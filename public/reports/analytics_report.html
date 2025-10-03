@@ -115,23 +115,23 @@
         <div class="map-grid">
             <div class="map-container">
                 <h4>Land Use Map</h4>
-                <img src="land_use_map.png" content-fetch-id="uploaded:land_use_map.jpg-655f04d7-4931-48a1-87e7-27de19f7d783" alt="Map showing different land use types in Hasmathnagar">
+                <img src="land_use_map.jpg" content-fetch-id="uploaded:land_use_map.jpg-655f04d7-4931-48a1-87e7-27de19f7d783" alt="Map showing different land use types in Hasmathnagar">
             </div>
             <div class="map-container">
                 <h4>Impervious Layer Map</h4>
-                <img src="impervious_layer.png" content-fetch-id="uploaded:impervious_layer.jpg-472d81cf-7434-456b-8366-eff795e69c20" alt="Map showing impervious surfaces">
+                <img src="impervious_layer.jpg" content-fetch-id="uploaded:impervious_layer.jpg-472d81cf-7434-456b-8366-eff795e69c20" alt="Map showing impervious surfaces">
             </div>
             <div class="map-container">
                 <h4>Slope Map</h4>
-                <img src="slope_map.png" content-fetch-id="uploaded:slope_map.jpg-6b5abc69-bad7-4220-991b-0ad303c35605" alt="Map showing the slope of the terrain">
+                <img src="slope_map.jpg" content-fetch-id="uploaded:slope_map.jpg-6b5abc69-bad7-4220-991b-0ad303c35605" alt="Map showing the slope of the terrain">
             </div>
             <div class="map-container">
                 <h4>Ward Map with Hotspots</h4>
-                <img src="ward_map_hotspot.png" content-fetch-id="uploaded:ward_map_hotspot.jpg-e5cf13ce-a2f7-4c4b-a3bd-57eb9419a85d" alt="Map of the ward with clogging hotspots">
+                <img src="ward_map_hotspot.jpg" content-fetch-id="uploaded:ward_map_hotspot.jpg-e5cf13ce-a2f7-4c4b-a3bd-57eb9419a85d" alt="Map of the ward with clogging hotspots">
             </div>
             <div class="map-container">
                 <h4>Ward Map with Robo Deployment</h4>
-                <img src="ward_map_robos.png" content-fetch-id="uploaded:ward_map_robos.jpg-d2ad5315-5fb4-4497-b2a9-3f5637ab8515" alt="Map of the ward showing robo deployment locations">
+                <img src="ward_map_robos.jpg" content-fetch-id="uploaded:ward_map_robos.jpg-d2ad5315-5fb4-4497-b2a9-3f5637ab8515" alt="Map of the ward showing robo deployment locations">
             </div>
         </div>
 
@@ -252,7 +252,18 @@
         </table>
     </div>
     <script>
-        const colors = ['#4e79a7', '#f28e2c', '#e15759', '#76b7b2', '#59a14f', '#edc948', '#b07aa1', '#ff9da7', '#9c755f', '#bab0ac'];
+const colors = [
+  '#4e79a7', // blue
+  '#76b7b2', // teal
+  '#e15759', // red
+  '#59a14f', // green
+  '#b07aa1', // purple
+  '#9c755f', // brown
+  '#bab0ac', // gray
+  '#8dd3c7', // aqua
+  '#fb8072', // salmon pink
+  '#80b1d3'  // light blue
+];
 
         // Junction Type Pie Chart
         new Chart(document.getElementById('junctionTypeChart'), {
@@ -312,7 +323,7 @@
                 responsive: true,
                 scales: {
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true           
                     }
                 }
             }
@@ -337,26 +348,26 @@
                 }
             }
         });
-        // Average Operation Time by Robo Bar Chart
-        new Chart(document.getElementById('roboOpTimeChart'), {
-            type: 'bar',
-            data: {
-                labels: ["sb_006", "sb_010", "sb_003", "sb_005", "sb_004", "sb_009", "sb_007", "sb_001", "sb_008", "sb_002"],
-                datasets: [{
-                    label: 'Avg. Operation Time (mins)',
-                    data: [22.06, 22.41, 22.48, 22.56, 22.59, 22.6, 22.86, 23.0, 23.31, 24.08],
-                    backgroundColor: colors[1]
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
+    // Average Operation Time by Robo Bar Chart
+new Chart(document.getElementById('roboOpTimeChart'), {
+    type: 'bar',
+    data: {
+        labels: ["sb_006", "sb_010", "sb_003", "sb_005", "sb_004", "sb_009", "sb_007", "sb_001", "sb_008", "sb_002"],
+        datasets: [{
+            label: 'Avg. Operation Time (mins)',
+            data: [22.06, 22.41, 22.48, 22.56, 22.59, 22.6, 22.86, 23.0, 23.31, 24.08],
+            backgroundColor: "rgba(144, 238, 144, 0.8)" // light green
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true
             }
-        });
+        }
+    }
+});
 
         // New Chart: Land Use Distribution Pie Chart
         new Chart(document.getElementById('landUseChart'), {

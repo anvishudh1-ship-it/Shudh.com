@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, act } from "react";
 import Papa from "papaparse";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -8,6 +8,8 @@ import { Trash } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
+import "leaflet/dist/leaflet.css";
+
 
 // ⬇️ import the global server data from context (adjust path if needed)
 import { useServerData } from "../context/ServerDataContext";
@@ -94,48 +96,61 @@ export default function Robots() {
       },
     });
   }, []);
-const [deviceImages, setDeviceImages] = useState({});
+  const [deviceImages, setDeviceImages] = useState({});
 
 useEffect(() => {
   const fetchImages = async () => {
     try {
       // Step 1: Get all devices
-      const devicesRes = await fetch("http://localhost:5000/api/devices");
+      const devicesRes = await fetch("https://shudhanvi-backend-cloud.onrender.com/api/devices");
       const devices = await devicesRes.json();
 
       const imgMap = {};
 
       // Step 2: For each device, fetch all its operations & images
       for (const deviceId of devices) {
-        const opsRes = await fetch(`http://localhost:5000/api/devices/${deviceId}/operations`);
+        const opsRes = await fetch(`https://shudhanvi-backend-cloud.onrender.com/api/devices/${deviceId}/operations`);
         const operations = await opsRes.json();
 
         imgMap[deviceId] = [];
 
         for (const opName of operations) {
-          const operationId = opName.split("_").pop(); // extract "1" from "deviceId_1"
-
+          // Normalize operationId for DB match
+          // Example: opName = "Kondapur_ofce_Kondapur_ofce_58"
+          // DB value = "Kondapur_ofce_58"
+          const operationId = opName.split(`${deviceId}_`).pop();
+          console.log("Fetching images for operation:", operationId);
           const imgRes = await fetch(
-            `http://localhost:5000/api/devices/${deviceId}/${operationId}/images`
+            `https://shudhanvi-backend-cloud.onrender.com/api/devices/${deviceId}/${opName}/images`
           );
           const images = await imgRes.json(); // { before: <url>, after: <url> }
 
           imgMap[deviceId].push({
-            operationId,
+            folderKey: opName,    // Full Azure folder name
+            operationId,          // Normalized for DB
             ...images,
           });
         }
       }
+     
 
-      console.log("📷 Device Images (all ops):", imgMap);
+
+      console.log("✅ Device Images (all ops):", imgMap);
+      for (const deviceId of Object.keys(imgMap)) {
+        console.log("Fetched images for device:", deviceId, imgMap[deviceId]);
+      }
       setDeviceImages(imgMap);
     } catch (err) {
-      console.error("Failed to fetch images:", err);
+      console.error("❌ Failed to fetch images:", err);
     }
   };
 
+  
+
   fetchImages();
 }, []);
+
+
 
 
   // ====== MERGE: whenever serverData or csvData changes, build final `data` ======
@@ -152,8 +167,16 @@ useEffect(() => {
   ].map((item) => {
     const ts = normalize(item.timestamp);
 
-    // For now: attach ALL operations' images for that device
-    const images = deviceImages[item.device_id] || [];
+    // find images for this operation_id
+    let images = [];
+    if (deviceImages[item.device_id]) {
+  images = deviceImages[item.device_id].filter((img) => {
+    // Normalize DB operationId too
+    const dbOp = item.operation_id.split(`${item.device_id}_`).pop();
+    return img.operationId === dbOp;
+  });
+}
+
 
     return { ...item, timestamp: ts, images };
   });
@@ -268,14 +291,14 @@ useEffect(() => {
   const activeRecord = selectedHistory || selectedDevice;
 
   return (
-    <div className="w-full px-[10px]">
+    <div className="w-full px-[10px] ">
       <section className="section1 mx-auto">
         <h1>Robot Fleet Management</h1>
         <p>Monitor your autonomus drainage robots</p>
       </section>
       {/* Filters */}
-      <section className="flex justify-center h-auto w-full mt-6">
-        <div className="flex flex-wrap gap-4 bg-white min-h-35 p-4 rounded-lg border border-gray-300">
+      <section className="flex justify-center h-auto w-full mt-6 ">
+        <div className="flex flex-wrap gap-4  min-h-35 p-4 rounded-xl border-gray-300 shadow-md justify-center items-center max-w-[1400px] shodow-md ">
           {/* Division */}
           <div className="m-auto text-start">
             <label className="block font-semibold mb-1">Division</label>
@@ -428,10 +451,10 @@ useEffect(() => {
                               className="inline-block w-4 h-4 mr-1"
                             />
                           </span>
-                          Gas level: {item.gas_level
-                              ? item.gas_level.charAt(0).toUpperCase() +
-                              item.gas_level.slice(1).toLowerCase()
-                              : "N/A"}
+                          Gas status: {item.gas_status
+                            ? item.gas_status.charAt(0).toUpperCase() +
+                            item.gas_status.slice(1).toLowerCase()
+                            : "N/A"}
                         </p>
                         <p className="flex items-center mb-2">
                           <span className="text-lg">
@@ -529,7 +552,7 @@ useEffect(() => {
                         color="#0380FC"
                       />
                       <span className="flex flex-col ml-2">
-                        Device Id{" "}
+                        Device Id{""}
                         <span className="text-[#21232C] text-[16px]">
                           {activeRecord.device_id}
                         </span>
@@ -573,7 +596,7 @@ useEffect(() => {
                       <span className="flex flex-col ml-2">
                         Task Duration{" "}
                         <span className="text-[#21232C] text-[16px]">
-                          {activeRecord.operation_time_minutes} mins
+                          {activeRecord?.operation_time_minutes ||"-"} mins
                         </span>
                       </span>
                     </span>
@@ -585,7 +608,7 @@ useEffect(() => {
                       <span className="flex flex-col ml-2">
                         Waste Collected{" "}
                         <span className="text-[#21232C] text-[16px]">
-                          {activeRecord.waste_collected_kg}kgs
+                          {activeRecord?.waste_collected_kg|| "-"}kgs
                         </span>
                       </span>
                     </span>
@@ -601,39 +624,38 @@ useEffect(() => {
                   <div className="flex flex-row mt-[24px] border border-gray-500 p-2 py-5 rounded-2xl " >
                     <div className="flex flex-col text-start text-[14px] text-[#676D7E] gap-y-2  w-max-content  flex-shrink-0">
                       <h1 className="text-[18px] text-black font-bold">Gas Level</h1>
-                      <p>Methane(CH4) : {"  "}<span className="text-[16px] text-[#21232C]">  {activeRecord?.gas_data ? JSON.parse(activeRecord.gas_data).CH4 : "N/A"} ppm</span></p>
-                      <p>Carbon Monoxide(CO) :{"  "}<span className="text-[16px] text-[#21232C]">  {activeRecord?.gas_data ? JSON.parse(activeRecord.gas_data).CO : "N/A"} ppm</span></p>
-                      <p>Hydrogen Sulphate(H2S) : {"  "}<span className="text-[16px] text-[#21232C]">  {activeRecord?.gas_data ? JSON.parse(activeRecord.gas_data).H2S : "N/A"} ppm</span></p>
-
+                      <p>Methane(CH4) : {"  "}<span className="text-[16px] text-[#21232C]">  {activeRecord?.gas_data_raw ? JSON.parse(activeRecord.gas_data_raw).CH4 : "N/A"} ppm</span></p>
+                      <p>Carbon Monoxide(CO) :{"  "}<span className="text-[16px] text-[#21232C]">  {activeRecord?.gas_data_raw ? JSON.parse(activeRecord.gas_data_raw).CO : "N/A"} ppm</span></p>
+                      <p>Hydrogen Sulphate(H2S) : {"  "}<span className="text-[16px] text-[#21232C]">  {activeRecord?.gas_data_raw ? JSON.parse(activeRecord.gas_data_raw).H2S : "N/A"} ppm</span></p>
                     </div>
 
                     <div className="flex items-center justify-center max-w-[120px] m-auto  flex-shrink-1">
                       <div style={{ width: "100%", height: "auto", aspectRatio: 1 / 1 }}>
                         <CircularProgressbar
                           value={
-                            activeRecord.gas_level?.toLowerCase() === "low"
+                            activeRecord.gas_status?.toLowerCase() === "safe"
                               ? 22
-                              : activeRecord.gas_level?.toLowerCase() ===
-                                "medium"
+                              : activeRecord.gas_status?.toLowerCase() ===
+                                "alert"
                                 ? 55
-                                : activeRecord.gas_level?.toLowerCase() === "high"
+                                : activeRecord.gas_status?.toLowerCase() === "toxic"
                                   ? 80
                                   : 0
                           }
                           text={
-                            activeRecord.gas_level
-                              ? activeRecord.gas_level.charAt(0).toUpperCase() +
-                              activeRecord.gas_level.slice(1).toLowerCase()
+                            activeRecord.gas_status
+                              ? activeRecord.gas_status.charAt(0).toUpperCase() +
+                                activeRecord.gas_status.slice(1).toLowerCase()
                               : "N/A"
                           }
                           styles={buildStyles({
                             textSize: "16px",
                             textColor: "#000",
                             pathColor:
-                              activeRecord.gas_level?.toLowerCase() === "high"
+                              activeRecord.gas_status?.toLowerCase() === "toxic"
                                 ? "red"
-                                : activeRecord.gas_level?.toLowerCase() ===
-                                  "medium"
+                                : activeRecord.gas_status?.toLowerCase() ===
+                                  "alert"
                                   ? "orange"
                                   : "green",
                             trailColor: "#eee",
@@ -647,7 +669,8 @@ useEffect(() => {
                   <div className=" w-full text-start text-[#21232C] mt-[24px] bg-gray-100 rounded-lg p-2 ">
                     <div className="flex flex-row justify-between">
                       <h1 className=" pb-1 text-start">
-                        {activeRecord.location}
+                        {console.log("Latitude:====", activeRecord.location)}
+                        {activeRecord?.location ? JSON.parse(activeRecord.location).latitude :activeRecord.location.latitude}, {activeRecord?.location ? JSON.parse(activeRecord.location).longitude : activeRecord.location.longitude}
                       </h1>
                       <h1>Manhole ID : {activeRecord?.manhole_id || "Unknown"}</h1>
                     </div>
@@ -655,9 +678,20 @@ useEffect(() => {
                     <div className="bd-gray">
                       {activeRecord?.location ? (
                         (() => {
-                          const [lat, lng] = activeRecord.location
-                            .split(",")
-                            .map(Number);
+                          let lat = 0;
+                          let lng = 0;
+
+                          try {
+                            // Parse location JSON string
+                            const loc = JSON.parse(activeRecord.location);
+
+                            lat = parseFloat(loc.latitude);
+                            lng = parseFloat(loc.longitude);
+                          } catch (err) {
+                            console.error("Invalid location format:", activeRecord.location, err);
+                          }
+
+
                           return (
                             <MapContainer
                               center={[lat, lng]}
@@ -665,9 +699,9 @@ useEffect(() => {
                               className="h-40 rounded-lg"
                             >
                               <TileLayer
-                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                              />
+    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  />
                               <Marker position={[lat, lng]}>
                                 <Popup>{activeRecord.location}</Popup>
                               </Marker>
@@ -681,15 +715,18 @@ useEffect(() => {
                       )}
                     </div>
                   </div>
- <h1 className="text-[16px] text-[#21232C] mt-[24px] text-start">
-  Operation Images
-</h1>
-<div className="rounded-lg mt-2 w-full grid grid-cols-2 gap-2 mb-10 bg-gray-100 h-[250px] overflow-y-auto">
-  <h1 className="mt-2">Before</h1>
-  <h1 className="mt-2">After</h1>
+                  <h1 className="text-[16px] text-[#21232C] mt-[24px] text-start">
+                    Operation Images
+                  </h1  >
+                  <div className="rounded-lg mt-2 w-full  bg-gray-100 overflow-y-auto ">
+                    <div className="flex justify-around px-2">
+                      <h1 className="mt-2">Before</h1>
+                      <h1 className="mt-2">After</h1>
+                    </div>
+                   
 
-  {/* Before Images Column */}
-  <div className="flex flex-col gap-2">
+                  <div className="grid grid-cols-2 gap-2 mb-10 h-[150px]">
+             <div className="flex flex-col gap-2">
     {activeRecord?.images?.some(op => op.before) ? (
       activeRecord.images.map((op, i) =>
         op.before ? (
@@ -702,15 +739,17 @@ useEffect(() => {
         ) : null
       )
     ) : (
+      
       <img
-        src="/images/before.png"
+        src={activeRecord.before_path}
         alt="No Before"
         className="h-full object-cover rounded-lg border"
       />
     )}
   </div>
 
-  {/* After Images Column */}
+  {/* After column */}
+  
   <div className="flex flex-col gap-2">
     {activeRecord?.images?.some(op => op.after) ? (
       activeRecord.images.map((op, i) =>
@@ -718,21 +757,25 @@ useEffect(() => {
           <img
             key={`after-${i}`}
             src={op.after}
+            
             alt={`After ${i}`}
             className="h-full object-cover rounded-lg border border-gray-100"
           />
         ) : null
       )
+      
     ) : (
       <img
-        src="/images/after.png"
+      src={activeRecord.after_path}
         alt="No After"
         className="h-full object-cover rounded-lg border"
       />
     )}
   </div>
 </div>
-
+                
+                  </div>
+                  {console.log(activeRecord?.before_path, activeRecord?.after_path)}
                   <div className=" flex justify-center w-full my-[20px] mb-10 ">
                     <button onClick={() => alert("Report Generated Successfully")} className=" flex items-center justify-center h-[48px] bg-[#1A8BA8] text-[16px]  w-full text-white rounded-[16px] cursor-pointer btn-hover">
                       <Download

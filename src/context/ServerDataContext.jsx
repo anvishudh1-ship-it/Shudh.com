@@ -15,7 +15,7 @@ export const ServerDataProvider = ({ children }) => {
         setLoading(true);
 
         const response = await fetch(
-          "https://sewage-bot-backend.onrender.com/api/data"
+          "https://sewage-bot-backend-vw44.onrender.com/api/data"
         );
 
         if (!response.ok) throw new Error(`Server error: ${response.status}`);

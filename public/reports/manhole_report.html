@@ -114,7 +114,7 @@
         </div>
 
         <h2>High-Level Ward Analytics</h2>
-        <div class="chart-grid">
+        <!-- <div class="chart-grid">
             <div class="chart-container">
                 <h3>Manhole Condition Distribution</h3>
                 <div id="manhole_condition_chart_container"></div>
@@ -122,7 +122,7 @@
             <div class="chart-container">
                 <h3>Junction Type Distribution</h3>
                 <div id="junction_type_chart_container"></div>
-            </div>
+            </div> -->
         </div>
         <div class="chart-grid">
             <div class="chart-container">
@@ -159,65 +159,65 @@
     </div>
 
     <script>
-        // Vega-Lite chart specs (manhole_condition_chart.json)
-        vegaEmbed('#manhole_condition_chart_container', {
-            "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json",
-            "title": "Manhole Condition Distribution",
-            "width": 500,
-            "datasets": { "data-52ea87b58e569efc980c3167e83c1384": [{ "Condition": "Fair", "Count": 20 }, { "Condition": "Good", "Count": 18 }, { "Condition": "Poor", "Count": 12 }] },
-            "layer": [
-                {
-                    "mark": { "type": "arc", "outerRadius": 120 },
-                    "encoding": {
-                        "color": { "field": "Condition", "legend": { "title": "Manhole Condition" }, "sort": { "field": "Count", "order": "descending" }, "type": "nominal" },
-                        "order": { "field": "Count", "sort": "descending", "type": "quantitative" },
-                        "theta": { "field": "Count", "stack": true, "type": "quantitative" },
-                        "tooltip": [{ "field": "Condition", "type": "nominal" }, { "field": "Count", "type": "quantitative" }]
-                    }
-                },
-                {
-                    "mark": { "type": "text", "radius": 140 },
-                    "encoding": {
-                        "color": { "value": "black" },
-                        "order": { "field": "Count", "sort": "descending", "type": "quantitative" },
-                        "text": { "field": "Condition", "type": "nominal" },
-                        "theta": { "field": "Count", "stack": true, "type": "quantitative" },
-                        "tooltip": [{ "field": "Condition", "type": "nominal" }, { "field": "Count", "type": "quantitative" }]
-                    }
-                }
-            ],
-            "data": { "name": "data-52ea87b58e569efc980c3167e83c1384" }
-        });
+        // // Vega-Lite chart specs (manhole_condition_chart.json)
+        // vegaEmbed('#manhole_condition_chart_container', {
+        //     "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json",
+        //     "title": "Manhole Condition Distribution",
+        //     "width": 500,
+        //     "datasets": { "data-52ea87b58e569efc980c3167e83c1384": [{ "Condition": "Fair", "Count": 20 }, { "Condition": "Good", "Count": 18 }, { "Condition": "Poor", "Count": 12 }] },
+        //     "layer": [
+        //         {
+        //             "mark": { "type": "arc", "outerRadius": 120 },
+        //             "encoding": {
+        //                 "color": { "field": "Condition", "legend": { "title": "Manhole Condition" }, "sort": { "field": "Count", "order": "descending" }, "type": "nominal" },
+        //                 "order": { "field": "Count", "sort": "descending", "type": "quantitative" },
+        //                 "theta": { "field": "Count", "stack": true, "type": "quantitative" },
+        //                 "tooltip": [{ "field": "Condition", "type": "nominal" }, { "field": "Count", "type": "quantitative" }]
+        //             }
+        //         },
+        //         {
+        //             "mark": { "type": "text", "radius": 140 },
+        //             "encoding": {
+        //                 "color": { "value": "black" },
+        //                 "order": { "field": "Count", "sort": "descending", "type": "quantitative" },
+        //                 "text": { "field": "Condition", "type": "nominal" },
+        //                 "theta": { "field": "Count", "stack": true, "type": "quantitative" },
+        //                 "tooltip": [{ "field": "Condition", "type": "nominal" }, { "field": "Count", "type": "quantitative" }]
+        //             }
+        //         }
+        //     ],
+        //     "data": { "name": "data-52ea87b58e569efc980c3167e83c1384" }
+        // });
 
-        // Vega-Lite chart specs (junction_type_chart.json)
-        vegaEmbed('#junction_type_chart_container', {
-            "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json",
-            "title": "Junction Type Distribution",
-            "width": 500,
-            "datasets": { "data-427dda10257459e3942c72fe2d60cf8d": [{ "Junction Type": "Bend", "Count": 12 }, { "Junction Type": "Y-Junction", "Count": 10 }, { "Junction Type": "Straight", "Count": 9 }, { "Junction Type": "Multi-Inlet", "Count": 9 }, { "Junction Type": "Cross-Junction", "Count": 8 }] },
-            "layer": [
-                {
-                    "mark": { "type": "arc", "outerRadius": 120 },
-                    "encoding": {
-                        "color": { "field": "Junction Type", "legend": { "title": "Junction Type" }, "sort": { "field": "Count", "order": "descending" }, "type": "nominal" },
-                        "order": { "field": "Count", "sort": "descending", "type": "quantitative" },
-                        "theta": { "field": "Count", "stack": true, "type": "quantitative" },
-                        "tooltip": [{ "field": "Junction Type", "type": "nominal" }, { "field": "Count", "type": "quantitative" }]
-                    }
-                },
-                {
-                    "mark": { "type": "text", "radius": 140 },
-                    "encoding": {
-                        "color": { "value": "black" },
-                        "order": { "field": "Count", "sort": "descending", "type": "quantitative" },
-                        "text": { "field": "Junction Type", "type": "nominal" },
-                        "theta": { "field": "Count", "stack": true, "type": "quantitative" },
-                        "tooltip": [{ "field": "Junction Type", "type": "nominal" }, { "field": "Count", "type": "quantitative" }]
-                    }
-                }
-            ],
-            "data": { "name": "data-427dda10257459e3942c72fe2d60cf8d" }
-        });
+        // // Vega-Lite chart specs (junction_type_chart.json)
+        // vegaEmbed('#junction_type_chart_container', {
+        //     "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json",
+        //     "title": "Junction Type Distribution",
+        //     "width": 500,
+        //     "datasets": { "data-427dda10257459e3942c72fe2d60cf8d": [{ "Junction Type": "Bend", "Count": 12 }, { "Junction Type": "Y-Junction", "Count": 10 }, { "Junction Type": "Straight", "Count": 9 }, { "Junction Type": "Multi-Inlet", "Count": 9 }, { "Junction Type": "Cross-Junction", "Count": 8 }] },
+        //     "layer": [
+        //         {
+        //             "mark": { "type": "arc", "outerRadius": 120 },
+        //             "encoding": {
+        //                 "color": { "field": "Junction Type", "legend": { "title": "Junction Type" }, "sort": { "field": "Count", "order": "descending" }, "type": "nominal" },
+        //                 "order": { "field": "Count", "sort": "descending", "type": "quantitative" },
+        //                 "theta": { "field": "Count", "stack": true, "type": "quantitative" },
+        //                 "tooltip": [{ "field": "Junction Type", "type": "nominal" }, { "field": "Count", "type": "quantitative" }]
+        //             }
+        //         },
+        //         {
+        //             "mark": { "type": "text", "radius": 140 },
+        //             "encoding": {
+        //                 "color": { "value": "black" },
+        //                 "order": { "field": "Count", "sort": "descending", "type": "quantitative" },
+        //                 "text": { "field": "Junction Type", "type": "nominal" },
+        //                 "theta": { "field": "Count", "stack": true, "type": "quantitative" },
+        //                 "tooltip": [{ "field": "Junction Type", "type": "nominal" }, { "field": "Count", "type": "quantitative" }]
+        //             }
+        //         }
+        //     ],
+        //     "data": { "name": "data-427dda10257459e3942c72fe2d60cf8d" }
+        // });
 
         // Vega-Lite chart specs (clogging_by_junction_chart.json)
         vegaEmbed('#clogging_by_junction_chart_container', {

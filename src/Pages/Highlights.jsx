@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Papa from "papaparse";
 
 const EmergencyBlockage = () => {
@@ -32,37 +32,36 @@ const EmergencyBlockage = () => {
       </section>
 
       <section className="max-w-full">
-        <div className=" flex justify-evenly px-5  mt-8">
+        <div className="flex justify-evenly px-5 mt-8">
           {/* Robot Section */}
-          <div className=" flex flex-row bg-[#ffffff] w-[70%] min-h-[330px] p-6 rounded-lg border border-gray-300">
-            <div className="flex items-center ">
+          <div className="flex flex-row bg-[#ffffff] w-[70%] min-h-[330px] gap-[20px] p-6 rounded-lg border border-gray-300">
+            <div className="flex items-center">
               <img
                 src="/images/Robo.jpg"
                 alt="Robot"
-                className="  h-[225px] w-[328px] rounded-2xl object-cover object-[65%]"
+                className="h-[225px] w-[328px] rounded-2xl object-cover object-[65%]"
               />
             </div>
-            <div className=" ">
-              <div>
-                <h3 className="text-3xl  text-start px-10 pt-5 pb-3">
-                  {data?.robot_id || "Robo_ yysb_001_5"}
-                </h3>
-                <p className=" text-lg px-10 pb-3 text-start text-gray-600">
-                  Exceptional performance in high-severity operations with zero
-                  downtime
-                </p>
-                <p className="text-gray-600 text-start px-10 pb-3 mt-3">
-                  <span>
-                    <img
-                      src="/icons/person-icon.png"
-                      alt="Operator"
-                      className="inline-block w-4 h-4 mr-2 "
-                    />
-                  </span>
-                  Operator Name:
-                  <span className=" text-black"> {data.operator_name}</span>
-                </p>
-              </div>
+
+            <div className="">
+              <h3 className="text-3xl text-start pt-5 pb-3">
+                {data?.robot_id || "Robo_ yysb_001_5"}
+              </h3>
+              <p className=" text-lg pb-3 text-start text-gray-600">
+                Exceptional performance in high-severity operations with zero
+                downtime
+              </p>
+              <p className="text-gray-600 text-start pb-3 mt-3">
+                <span>
+                  <img
+                    src="/icons/person-icon.png"
+                    alt="Operator"
+                    className="inline-block w-6 h-auto mr-2"
+                  />
+                </span>
+                Operator Name:
+                <span className=" text-black"> {data.operator_name}</span>
+              </p>
               <div className="flex flex-row justify-evenly items-end mt-5">
                 <div className="">
                   <p className="text-2xl font-bold text-[#1A8BA8]">
@@ -119,7 +118,7 @@ const EmergencyBlockage = () => {
                   week. Achieved perfect safety record while maximizing
                   efficiency.
                 </p>
-                <div className="flex flex-row justify-evenly">
+                <div className="flex flex-row gap-[10px] justify-evenly">
                   <p className="md:px-3 py-1 text-green-600 border-1 border-green-700 bg-green-100 rounded-lg text-sm">
                     Zero incidents
                   </p>
@@ -173,16 +172,16 @@ const EmergencyBlockage = () => {
           </p>
 
           {/* Timeline */}
-          <div className="flex flex-wrap  items-center justify-center text-center mb-8 mt-10 px-auto">
-            <div className="flex flex-row  ">
-              <div className="bg-red-50 h-11 w-11 flex items-center rounded-3xl m-auto">
+          <div className="w-full flex flex-nowrap shrink-1 items-center justify-center gap-0 text-center mb-8 mt-10 px-auto">
+            <div className="flex flex-row">
+              <div className="bg-red-50 h-11 w-11 flex items-center rounded-3xl m-auto shadow-xl shadow-gray-200">
                 <img
                   src="/icons/warning-red-icon.png"
                   alt="icon"
-                  className="m-auto"
+                  className="w-[25px] h-auto m-auto"
                 />
               </div>
-              <div className="w-35 p-2 ml-2">
+              <div className="w-35 p-2 ml-2 pr-0">
                 <p className="text-md font-medium pt-2 text-start">
                   Hotspot Alert Triggered
                 </p>
@@ -191,15 +190,15 @@ const EmergencyBlockage = () => {
                 </p>
               </div>
             </div>
-            <div>
-              <hr className="border-1 w-6 border-gray-300 mr-4" />
+            <div className="px-2 mr-2">
+              <hr className="border-1 w-6 border-gray-300" />
             </div>
             <div className="flex flex-row  ">
-              <div className="bg-blue-50 h-11 w-11 flex items-center rounded-3xl m-auto">
+              <div className="bg-blue-50 h-11 w-11 flex items-center rounded-3xl m-auto shadow-xl shadow-gray-200">
                 <img
                   src="/icons/clock-blue-icon.png"
                   alt="icon"
-                  className="m-auto"
+                  className="w-[25px] h-auto m-auto"
                 />
               </div>
               <div className="w-35 p-2 ml-2">
@@ -211,15 +210,15 @@ const EmergencyBlockage = () => {
                 </p>
               </div>
             </div>
-            <div>
-              <hr className="border-1 w-6 border-gray-300 mr-4" />
+            <div className="px-2 mr-2">
+              <hr className="border-1 w-6 border-gray-300" />
             </div>
-            <div className="flex flex-row  ">
-              <div className="bg-yellow-50 h-11 w-11 flex items-center rounded-3xl m-auto">
+            <div className="flex flex-row">
+              <div className="bg-yellow-50 h-11 w-11 flex items-center rounded-3xl m-auto shadow-xl shadow-gray-200">
                 <img
                   src="/icons/warning-orange-icon.png"
                   alt="icon"
-                  className="m-auto"
+                  className="w-[25px] h-auto m-auto"
                 />
               </div>
               <div className="w-35 p-2 ml-2">
@@ -231,15 +230,15 @@ const EmergencyBlockage = () => {
                 </p>
               </div>
             </div>
-            <div>
-              <hr className="border-1 w-6 border-gray-300 mr-4" />
+            <div className="px-2 mr-2">
+              <hr className="border-1 w-6 border-gray-300" />
             </div>
-            <div className="flex flex-row  ">
-              <div className="bg-green-50 h-11 w-11 flex items-center rounded-3xl m-auto">
+            <div className="flex flex-row">
+              <div className="bg-green-50 h-11 w-11 flex items-center rounded-3xl m-auto shadow-xl shadow-gray-200">
                 <img
                   src="/icons/completed-icon.png"
                   alt="icon"
-                  className="m-auto"
+                  className="w-[25px] h-auto m-auto"
                 />
               </div>
               <div className="w-35 p-2 ml-2">
@@ -252,8 +251,9 @@ const EmergencyBlockage = () => {
               </div>
             </div>
           </div>
+
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center px-10 md:px-50">
+          <div className="flex justify-center gap-[25px] text-center">
             <div className="bg-blue-50 border border-blue-300 rounded-lg p-2 h-30 w-40 flex flex-col items-center justify-center">
               <p className="text-2xl font-bold text-[#1A8BA8] pt-3">
                 {data?.resolution_time_min || "28 mins"}
@@ -280,19 +280,19 @@ const EmergencyBlockage = () => {
             </div>
           </div>
 
-          <div className="flex flex-row gap-4 text-center  py-20 px-20 justify-center">
-            <div className=" h-50 w-70 rounded-2xl bg-cover bg-center bg-gray-200 flex items-center justify-center">
+          <div className="flex flex-col md:flex-row gap-4 text-center py-15 justify-center align-middle">
+            <div className="h-auto w-auto rounded-2xl bg-cover bg-center bg-gray-200 flex items-center justify-center">
               <img
                 src="/images/before.png"
                 alt="Before"
-                className="w-full h-full object-cover rounded-2xl"
+                className="w-full max-w-[350px] h-full object-cover rounded-2xl"
               />
             </div>
-            <div className=" h-50 w-70 rounded-2xl bg-cover bg-center bg-gray-200 flex items-center justify-center">
+            <div className="h-auto w-auto rounded-2xl bg-cover bg-center bg-gray-200 flex items-center justify-center">
               <img
                 src="/images/after.png"
                 alt="After"
-                className="w-full h-full object-cover rounded-2xl"
+                className="w-full max-w-[350px] h-full object-cover rounded-2xl"
               />
             </div>
           </div>

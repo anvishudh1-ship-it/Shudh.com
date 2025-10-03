@@ -176,63 +176,64 @@
     </div>
 
     <script>
-        const colors = ['#4e79a7', '#f28e2c', '#e15759', '#76b7b2'];
+    const colors = ['#4e79a7', '#76b7b2', '#e15759', '#59a14f'];
 
-        // Blockage Level Bar Chart
-        new Chart(document.getElementById('blockageChart'), {
-            type: 'bar',
-            data: {
-                labels: ["medium", "low", "high"],
-                datasets: [{
-                    label: 'Number of Operations',
-                    data: [15, 13, 10],
-                    backgroundColor: colors.slice(0, 3)
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Number of Operations'
-                        }
+    // Blockage Level Bar Chart
+    new Chart(document.getElementById('blockageChart'), {
+        type: 'bar',
+        data: {
+            labels: ["medium", "low", "high"],
+            datasets: [{
+                label: 'Number of Operations',
+                data: [15, 13, 10],
+                backgroundColor: colors.slice(0, 3)
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Operations'
                     }
                 }
             }
-        });
+        }
+    });
 
-        // Comparative Analysis Bar Chart
-        new Chart(document.getElementById('comparisonChart'), {
-            type: 'bar',
-            data: {
-                labels: ["Avg. Op. Time (mins)", "Avg. Waste (kg)"],
-                datasets: [{
-                    label: 'sb_002',
-                    data: [24.08, 6.00],
-                    backgroundColor: colors[0]
-                }, {
-                    label: 'All Robots Avg.',
-                    data: [22.82, 5.94],
-                    backgroundColor: colors[1]
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Value'
-                        }
+    // Comparative Analysis Bar Chart
+    new Chart(document.getElementById('comparisonChart'), {
+        type: 'bar',
+        data: {
+            labels: ["Avg. Op. Time (mins)", "Avg. Waste (kg)"],
+            datasets: [{
+                label: 'sb_002',
+                data: [24.08, 6.00],
+                backgroundColor: colors[0] // blue
+            }, {
+                label: 'All Robots Avg.',
+                data: [22.82, 5.94],
+                backgroundColor: colors[1] // teal
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Value'
                     }
                 }
             }
-        });
-    </script>
+        }
+    });
+</script>
+
 </body>
 </html>

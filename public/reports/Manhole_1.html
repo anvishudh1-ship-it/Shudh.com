@@ -3,178 +3,247 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Manhole Report - SB_001</title>
+<title>Live Manhole Report</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 <style>
+/* ... (existing CSS from your original HTML) ... */
 body{font-family:'Segoe UI',Arial,sans-serif;margin:0;background:#f9fafb;color:#111}
 header{background:#1f2937;color:#fff;text-align:center;padding:16px}
 .container{max-width:1200px;margin:0 auto;padding:20px}
-
-/* Section title */
-.section-title{
-  text-align:center;font-weight:700;font-size:1.5rem;
-  background:#f3f4f6;border-radius:8px;padding:10px;margin-bottom:20px;
-  font-family:'Segoe UI',Tahoma,sans-serif
-}
-
-/* Cards */
-.card-grid{display:grid;gap:15px;margin-bottom:20px}
-.card{background:#fff;border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;
-  border:1px solid #e5e7eb;box-shadow:0 2px 6px rgba(0,0,0,0.08)}
+.section-title{text-align:center;font-weight:700;font-size:1.5rem;background:#f3f4f6;border-radius:8px;padding:10px;margin-bottom:20px;font-family:'Segoe UI',Tahoma,sans-serif}
+.card-grid{display:grid;gap:15px;margin-bottom:20px;grid-template-columns: repeat(3, 1fr);}
+.card{background:#fff;border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;border:1px solid #e5e7eb;box-shadow:0 2px 6px rgba(0,0,0,0.08)}
 .card-icon{background:#f3f4f6;border-radius:8px;padding:10px;font-size:1.4rem;color:#4b5563}
 .card h3{margin:0;font-size:1.15rem;font-weight:700}
 .card p{margin:0;font-size:.9rem;color:#6b7280}
-
-/* Map */
 .map-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,0.08);padding:16px;margin-bottom:20px;text-align:center;max-width:700px;margin-left:auto;margin-right:auto}
 .map-card img{width:100%;border-radius:8px;border:1px solid #d1d5db}
-
-/* Two-column layout */
 .two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-bottom:20px}
 .section{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,0.08);padding:16px}
 h2{margin:0 0 12px;font-size:1.1rem;border-left:4px solid #3b82f6;padding-left:10px}
-
 table{width:100%;border-collapse:collapse;background:#fff}
 table,th,td{border:1px solid #d1d5db}
 th,td{padding:8px;text-align:left}
 th{background:#f9fafb;font-weight:600}
-
-/* Charts grid */
 .charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
 .chart-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,0.08);padding:14px}
 .chart-card h3{margin:0 0 10px;font-size:1rem;text-align:center}
 canvas{max-width:100%;height:auto !important}
-
-/* Status badges */
 .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:.85rem;font-weight:700}
 .badge-ok{background:#d1fae5;color:#065f46}
 .badge-warn{background:#fef3c7;color:#92400e}
 .badge-danger{background:#fee2e2;color:#991b1b}
+.manhole-selector{margin-bottom: 20px; text-align: center;}
+.manhole-selector select{padding: 8px; border-radius: 6px; border: 1px solid #ccc; font-size: 1rem;}
 </style>
 </head>
 <body>
 <header>
-  <h1>Manhole Report - SB_001</h1>
-  <p>Detailed operational, inspection, and predictive analysis</p>
+  <h1>Live Manhole Report</h1>
+  <p>Detailed operational, inspection, and predictive analysis</p>
 </header>
-
 <div class="container">
-
-  <!-- Quick Stats Top Row -->
-  <div class="card-grid" style="grid-template-columns: repeat(3, 1fr);">
-    <div class="card"><div class="card-icon"><i class="fa-solid fa-faucet-drip"></i></div><div><h3>SB_001</h3><p>Manhole ID</p></div></div>
-    <div class="card"><div class="card-icon"><i class="fa-solid fa-broom"></i></div><div><h3>22-05-2023</h3><p>Last Cleaned</p></div></div>
-    <div class="card"><div class="card-icon"><i class="fa-solid fa-rotate"></i></div><div><h3>4</h3><p>Total Operations</p></div></div>
-  </div>
-
-  <!-- Map -->
-  <div class="map-card">
-    <div class="section-title">SB_001 Location Map</div>
-    <img src="Map.jpg" alt="SB_001 Map">
-  </div>
-
-  <!-- Gas Readings & Prediction -->
-  <div class="two-col">
-    <div class="section">
-      <h2 style="height: fit-content;">Gas Readings</h2>
-      <table>
-        <tr><th>CO</th><td>1.38</td></tr>
-        <tr><th>CH₄</th><td>50.12</td></tr>
-        <tr><th>H₂S</th><td>7.93</td></tr>
-      </table>
-      
-    </div>
-    <div class="section" style="height: fit-content;">
-      <h2>Cleaning Prediction</h2>
-      <table>
-        <tr><th>Cleaning Frequency</th><td>45 days</td></tr>
-        <tr><th>Days Since Last Cleaning</th><td>24 days</td></tr>
-        <tr><th>Next Cleaning</th><td>21 days remaining</td></tr>
-        <tr><th>Next Cleaning Date</th><td>06-07-2023</td></tr>
-      </table>
-      <div style="margin-top:10px">
-        <span class="badge badge-ok">System Ready</span>
-        <span class="badge badge-ok">Robot Available 5 days early</span>
-      </div>
-    </div>
-  </div>
-  
-  <div class="section">
-    <h2>Operation Summary</h2>
-    <table>
-      <tr><th>Date</th><th>Activity</th><th>Remarks</th></tr>
-      <tr><td>20-03-2023</td><td>Cleaning</td><td>Removed 8 kg waste</td></tr>
-      <tr><td>05-04-2023</td><td>Inspection</td><td>Condition Good</td></tr>
-      <tr><td>15-05-2023</td><td>Cleaning</td><td>No major blockages</td></tr>
-      <tr><td>22-05-2023</td><td>Final Inspection</td><td>Ready for operation</td></tr>
-    </table>
-  </div>
-
-  <!-- Pie Analysis Charts -->
-  <div class="section-title" style="font-size: xx-large;">Manhole Analysis</div>
-  <div class="charts-grid">
-    <div class="chart-card"  style="height: fit-content; max-width: auto;">
-        <h3>Gas Composition</h3>
-        <canvas id="gasPie"></canvas>
-      </div>
-
-    <div class="chart-card"><h3>Condition Distribution</h3><canvas id="condPie"></canvas></div>
-    <div class="chart-card"><h3>Sewer Length by Area</h3><canvas id="sewerPie"></canvas></div>
-    <div class="chart-card"><h3>Waste by Blockage</h3><canvas id="wasteBar"></canvas></div>
-    <div class="chart-card"><h3>Junction Type Distribution</h3><canvas id="junctionBar"></canvas></div>
-    <div class="chart-card"><h3>Clogging by Junction</h3><canvas id="cloggingBar"></canvas></div>
-  </div>
-
+  <div class="manhole-selector">
+    <label for="manhole-id-select">Select Manhole ID:</label>
+    <select id="manhole-id-select"></select>
+  </div>
+  <div class="card-grid">
+    <div class="card"><div class="card-icon"><i class="fa-solid fa-faucet-drip"></i></div><div><h3 id="manhole-id-display">SB_001</h3><p>Manhole ID</p></div></div>
+    <div class="card"><div class="card-icon"><i class="fa-solid fa-broom"></i></div><div><h3 id="last-cleaned">N/A</h3><p>Last Cleaned</p></div></div>
+    <div class="card"><div class="card-icon"><i class="fa-solid fa-rotate"></i></div><div><h3 id="total-ops">N/A</h3><p>Total Operations</p></div></div>
+  </div>
+  <div class="map-card">
+    <div class="section-title" id="map-title">SB_001 Location Map</div>
+    <img src="https://via.placeholder.com/650x300?text=Map+of+Manhole+Location" alt="Manhole Map">
+  </div>
+  <div class="two-col">
+    <div class="section">
+      <h2>Gas Readings</h2>
+      <table>
+        <tr><th>CO</th><td id="co-val">N/A</td></tr>
+        <tr><th>CH₄</th><td id="ch4-val">N/A</td></tr>
+        <tr><th>H₂S</th><td id="h2s-val">N/A</td></tr>
+      </table>
+    </div>
+    <div class="section">
+      <h2>Cleaning Prediction</h2>
+      <table>
+        <tr><th>Cleaning Frequency</th><td id="clean-freq">N/A</td></tr>
+        <tr><th>Days Since Last Cleaning</th><td id="days-since-clean">N/A</td></tr>
+        <tr><th>Next Cleaning</th><td id="next-clean-days">N/A</td></tr>
+        <tr><th>Next Cleaning Date</th><td id="next-clean-date">N/A</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="section">
+    <h2>Operation Summary</h2>
+    <table>
+    <tr><th>Date</th><th>Activity</th><th>Remarks</th></tr>
+      <tr><td><span id="ops-date">N/A</span></td><td><span id="ops-activity">N/A</span></td><td><span id="ops-remarks">N/A</span></td></tr>
+   </table>
+  </div>
+  <div class="section-title" style="font-size: xx-large;">Manhole Analytics</div>
+  <div class="charts-grid">
+    <div class="chart-card"><h3>Gas Composition</h3><canvas id="gasPie"></canvas></div>
+    <div class="chart-card"><h3>Condition Distribution</h3><canvas id="condPie"></canvas></div>
+    <div class="chart-card"><h3>Sewer Length by Area</h3><canvas id="sewerPie"></canvas></div>
+    <div class="chart-card"><h3>Waste by Blockage</h3><canvas id="wasteBar"></canvas></div>
+    <div class="chart-card"><h3>Junction Type Distribution</h3><canvas id="junctionBar"></canvas></div>
+    <div class="chart-card"><h3>Clogging by Junction</h3><canvas id="cloggingBar"></canvas></div>
+  </div>
 </div>
-
 <script>
 Chart.register(ChartDataLabels);
+const charts = {}; // Store chart instances globally
 
-function pieChart(id, labels, data, colors){
-  new Chart(document.getElementById(id),{
-    type:'pie',
-    data:{labels:labels,datasets:[{data:data,backgroundColor:colors}]},
-    options:{
-      responsive:true,
-      plugins:{
-        legend:{position:'bottom'},
-        datalabels:{
-          color:'#fff',
-          formatter:(v,ctx)=>{
-            const total = ctx.chart.data.datasets[0].data.reduce((a,b)=>a+b,0);
-            return total ? (v/total*100).toFixed(1)+'%' : '';
-          }
-        }
-      }
+// Utility function to create/update charts
+function updatePieChart(id, labels, data, colors) {
+    if (charts[id]) {
+        charts[id].data.datasets[0].data = data;
+        charts[id].update();
+    } else {
+        charts[id] = new Chart(document.getElementById(id), {
+            type: 'pie',
+            data: { labels: labels, datasets: [{ data: data, backgroundColor: colors }] },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    datalabels: {
+                        color: '#fff',
+                        formatter: (v, ctx) => {
+                            const total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                            return total ? (v / total * 100).toFixed(1) + '%' : '';
+                        }
+                    }
+                }
+            }
+        });
     }
-  });
 }
-function barChart(id, labels, data, label){
-  new Chart(document.getElementById(id),{
-    type:'bar',
-    data:{labels:labels,datasets:[{label:label,data:data}]},
-    options:{
-      responsive:true,
-      plugins:{legend:{display:false},datalabels:{anchor:'end',align:'top'}},
-      scales:{y:{beginAtZero:true}}
+function updateBarChart(id, labels, data, label) {
+    if (charts[id]) {
+        charts[id].data.datasets[0].data = data;
+        charts[id].update();
+    } else {
+        charts[id] = new Chart(document.getElementById(id), {
+            type: 'bar',
+            data: { labels: labels, datasets: [{ label: label, data: data, backgroundColor: '#3b82f6' }] },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', color: '#4b5563' } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
     }
-  });
 }
+let manholeData = []; // To store the fetched data
+const manholeSelect = document.getElementById('manhole-id-select');
+const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSsAGjWDY4O-BeUHO4ECifCzY5I3p4Gi7zvMEUKF8QRUcq3nx8k_FaOBRDb-H7sjzhb3kHTmXDyHN0d/pub?output=csv" // *** REPLACE WITH YOUR URL ***
 
-// Gas composition
-pieChart('gasPie',['CO','CH₄','H₂S'],[1.38,50.12,7.93],['#60a5fa','#f59e0b','#ef4444']);
-// Condition
-pieChart('condPie',['Fair','Good','Poor'],[20,18,12],['#fbbf24','#22c55e','#ef4444']);
-// Sewer length
-pieChart('sewerPie',['Residential','Slum','Waterbody'],[24.77,30.42,16.23],['#3b82f6','#f59e0b','#8b5cf6']);
-// Waste
-barChart('wasteBar',['Low','Medium','High'],[5.81,6.33,5.79],'Avg Waste (kg)');
-// Junction type
-barChart('junctionBar',['Y-Junction','Bend','Multi-Inlet','Straight','Cross'],[10,9,12,9,8],'Count');
-// Clogging
-barChart('cloggingBar',['Bend','Y-Junction','Straight','Multi-Inlet','Cross'],[59,50,42,41,33],'Incidents');
+// Function to fetch data from the Google Sheet
+// Function to fetch data from the Google Sheet
+async function fetchManholeData() {
+    try {
+        const response = await fetch(sheetUrl);
+        const textData = await response.text();
+        const rows = textData.split('\n').slice(1);
+        manholeData = rows.map(row => {
+            const [
+                manhole_id, location, last_cleaned, total_ops, co, ch4, h2s, clean_freq, days_since_clean,
+                next_clean_days, next_clean_date, condition_fair, condition_good, condition_poor,
+                residential_km, slum_km, waterbody_km, waste_low, waste_med, waste_high,
+                junction_y, junction_bend, junction_multi, junction_straight, junction_cross,
+                clogging_bend, clogging_y, clogging_straight, clogging_multi, clogging_cross
+            ] = row.split(',');
+            
+            return {
+                manhole_id: manhole_id,
+                location: location, // New variable for the location
+                last_cleaned: last_operation_date,
+                total_ops: parseInt(total_ops),
+                co: parseFloat(co),
+                ch4: parseFloat(ch4),
+                h2s: parseFloat(h2s),
+                clean_freq: parseInt(clean_freq),
+                days_since_clean: parseInt(days_since_clean),
+                next_clean_days: parseInt(next_clean_days),
+                next_clean_date: next_clean_date,
+                condition_fair: parseInt(condition_fair),
+                condition_good: parseInt(condition_good),
+                condition_poor: parseInt(condition_poor),
+                residential_km: parseFloat(residential_km),
+                slum_km: parseFloat(slum_km),
+                waterbody_km: parseFloat(waterbody_km),
+                waste_low: parseFloat(waste_low),
+                waste_med: parseFloat(waste_med),
+                waste_high: parseFloat(waste_high),
+                junction_y: parseInt(junction_y),
+                junction_bend: parseInt(junction_bend),
+                junction_multi: parseInt(junction_multi),
+                junction_straight: parseInt(junction_straight),
+                junction_cross: parseInt(junction_cross),
+                clogging_bend: parseInt(clogging_bend),
+                clogging_y: parseInt(clogging_y),
+                clogging_straight: parseInt(clogging_straight),
+                clogging_multi: parseInt(clogging_multi),
+                clogging_cross: parseInt(clogging_cross)
+            };
+        });
+
+        populateManholeSelector();
+        displayManholeData(manholeData[0].manhole_id);
+    } catch (error) {
+        console.error('Error fetching manhole data:', error);
+        alert('Could not fetch data. Please check the sheet URL and if it is published.');
+    }
+}
+// Populates the dropdown menu with manhole IDs
+function populateManholeSelector() {
+    manholeData.forEach(manhole => {
+        const option = document.createElement('option');
+        option.value = manhole.manhole_id;
+        option.textContent = manhole.manhole_id;
+        manholeSelect.appendChild(option);
+    });
+}
+// Function to update all HTML elements and charts
+function displayManholeData(manholeId) {
+    const data = manholeData.find(m => m.manhole_id === manholeId);
+    if (!data) return;
+    // Update top cards
+    document.getElementById('manhole-id-display').textContent = data.manhole_id;
+    document.getElementById('last-cleaned').textContent = data.last_cleaned;
+    document.getElementById('total-ops').textContent = data.total_ops;
+    document.getElementById('map-title').textContent = `${data.manhole_id} Location Map`;
+    // Update tables
+    document.getElementById('co-val').textContent = data.co;
+    document.getElementById('ch4-val').textContent = data.ch4;
+    document.getElementById('h2s-val').textContent = data.h2s;
+    document.getElementById('clean-freq').textContent = `${data.clean_freq} days`;
+    document.getElementById('days-since-clean').textContent = `${data.days_since_clean} days`;
+    document.getElementById('next-clean-days').textContent = `${data.next_clean_days} days remaining`;
+    document.getElementById('next-clean-date').textContent = data.next_clean_date;
+    // Update a simplified Operation Summary
+    document.getElementById('ops-date').textContent = data.last_cleaned;
+    document.getElementById('ops-activity').textContent = 'Final Inspection';
+    document.getElementById('ops-remarks').textContent = 'Ready for operation';
+    // Update charts with data for the selected manhole
+    updatePieChart('gasPie', ['CO', 'CH₄', 'H₂S'], [data.co, data.ch4, data.h2s], ['#B67300', '#60a5fa', '#ef4444']);
+    updatePieChart('condPie', ['Fair', 'Good', 'Poor'], [data.condition_fair, data.condition_good, data.condition_poor], ['#60a5fa', '#22c55e', '#ef4444']);
+    updatePieChart('sewerPie', ['Residential', 'Slum', 'Waterbody'], [data.residential_km, data.slum_km, data.waterbody_km], ['#3b82f6', '#E40000', '#8b5cf6']);
+    updateBarChart('wasteBar', ['Low', 'Medium', 'High'], [data.waste_low, data.waste_med, data.waste_high], 'Avg Waste (kg)');
+    updateBarChart('junctionBar', ['Y-Junction', 'Bend', 'Multi-Inlet', 'Straight', 'Cross'], [data.junction_y, data.junction_bend, data.junction_multi, data.junction_straight, data.junction_cross], 'Count');
+    updateBarChart('cloggingBar', ['Bend', 'Y-Junction', 'Straight', 'Multi-Inlet', 'Cross'], [data.clogging_bend, data.clogging_y, data.clogging_straight, data.clogging_multi, data.clogging_cross], 'Incidents');
+}
+// Event listener for the dropdown menu
+manholeSelect.addEventListener('change', (event) => {
+    displayManholeData(event.target.value);
+});
+// Initial data fetch on page load
+fetchManholeData();
 </script>
 </body>
 </html>

@@ -34,6 +34,7 @@ export default function Robots() {
   const sections = [
     ...new Set(csvData.filter((row) => row.division === division).map((row) => row.section)),
   ];
+  console.log({ divisions, sections });
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">

@@ -3,7 +3,12 @@
 * {
   box-sizing: border-box;
 }
-
+/* mapbox water mark */
+.mapboxgl-ctrl-bottom-right{
+  display: none !important;
+  visibility: hidden !important;
+  
+}
 #root {
   margin: 0 !important;
   padding: 0 !important;
@@ -248,4 +253,24 @@ body::-webkit-scrollbar-track,
     visibility: visible;
     z-index: 910;
   }
+}
+
+#mhpop {
+  /* Positioning and layout */
+  position: absolute;
+  top: 0;
+  left: 0;
+    /* Centers pop-up and positions it above the marker */
+  
+  /* Sizing and spacing */
+  font-size: 20px; 
+  padding: 5px; 
+  text-align: center; 
+  white-space: nowrap; /* Prevents text from wrapping */
+
+  /* Appearance */
+  background-color: white; 
+  border: 1px solid #ccc; /* Add a subtle border */
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }

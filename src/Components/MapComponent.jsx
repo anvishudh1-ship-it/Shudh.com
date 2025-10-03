@@ -1,526 +1,420 @@
-import React, { useState, useEffect } from "react";
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  Polygon,
-  useMap,
-} from "react-leaflet";
-import L from "leaflet";
-import { CheckCircle, Clock, AlertTriangle, Ear } from "lucide-react";
-import ManholePopUp from "./ManholePopUp";
-import ReactDOMServer from "react-dom/server";
-import "leaflet/dist/leaflet.css";
-import Papa from "papaparse";
+import React, { useState, useEffect, useRef } from "react";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
 import * as XLSX from "xlsx";
 
-import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
-import markerIcon from "leaflet/dist/images/marker-icon.png";
-import markerShadow from "leaflet/dist/images/marker-shadow.png";
+// --- Assuming these components exist in the same directory ---
+import ManholePopUp from "./ManholePopUp";
 import WardDetailsPopUp from "./WardDetailsPopUp";
-import { DummyWardData } from "../../public/datafiles/DummyWardData";
-import useGeoCode from "./GeoCoding";
 import FilterableWardSelect from "./FilterableWardSelect";
-import { useServerData } from "../context/ServerDataContext";
 
-
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIcon2x,
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-});
+// --- Mapbox Access Token ---
+mapboxgl.accessToken = "pk.eyJ1Ijoic2h1YmhhbWd2IiwiYSI6ImNtZGZ1YmRhdzBqMmcya3I1cThjYWloZnkifQ.5ZIhoOuwzrGin8wzM5-0nQ";
 
 const MapComponent = () => {
-  const [selectedManholeLocation, setSelectedManholeLocation] = useState(null);
-  const [selectedOps, setSelectedOps] = useState([]);
-  const [operationData, setOperationData] = useState([]);
-  const [manholePoints, setManholePoints] = useState([]);
-  const [latInput, setLatInput] = useState("");
-  const [lonInput, setLonInput] = useState("");
-  const { serverData, loading, message } = useServerData();
-  const [mapCenter, setMapCenter] = useState({
-    lat: 17.472427,
-    lng: 78.482286,
-  });
+  // --- Refs for Mapbox instance and container ---
+  const mapContainer = useRef(null);
+  const map = useRef(null);
+  const popup = useRef(new mapboxgl.Popup({ offset: 15, closeButton: false }));
+  // Use a ref for the selected manhole ID so the map event listener can access the latest value
+  const selectedManholeIdRef = useRef(null);
 
-  // Ward related states
-  const [wardData, setWardData] = useState([]);
-  const [selectedWard, setSelectedWard] = useState(null);
-  const [wardPolygons, setWardPolygons] = useState({});
+  // --- State Management ---
+  const [selectedManholeLocation, setSelectedManholeLocation] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [filter, setFilter] = useState("all");
+  const [latInput, setLatInput] = useState("");
+  const [lonInput, setLonInput] = useState("");
+  const [wardData, setWardData] = useState([]);
+  const [selectedWard, setSelectedWard] = useState(null);
+  const [wardPolygons, setWardPolygons] = useState({});
 
-  // using geocode for mapping by area names
-  const setGeocode = useGeoCode();
-
-  //recenter map with lat/long values
-  const RecenterMap = ({ lat, lng, zoom }) => {
-    // console.log('RecenterMap', lat, lng, zoom, selectedWard)
-    const map = useMap();
-    useEffect(() => {
-      // console.log('mapping');
-      map.setView([lat, lng], zoom);
-    }, [lat, lng, zoom, map]);
-    return null;
-  };
-
-  // Component to zoom to selected ward
-  const ZoomToWard = ({ coordinates }) => {
-    const map = useMap();
-    useEffect(() => {
-      if (coordinates?.length) {
-        map.fitBounds(coordinates);
-      }
-    }, [coordinates, map]);
-    return null;
-  };
-
-  const [zoom, setZoom] = useState(15);
-  const [filter, setFilter] = useState("all");
-
-  // Load ward coordinates from Excel file in public folder
-  useEffect(() => {
-    fetch("/datafiles/ward_coordinates.xlsx")
-      .then((res) => res.arrayBuffer())
-      .then((ab) => {
-        const wb = XLSX.read(ab, { type: "array" });
-        const ws = wb.Sheets[wb.SheetNames[0]];
-        const data = XLSX.utils.sheet_to_json(ws);
-
-        const grouped = {};
-        data.forEach((row) => {
-          const name = row.Ward;
-          const coord = [row.y, row.x]; // [lat, lng]
-          if (!grouped[name]) grouped[name] = [];
-          grouped[name].push(coord);
-        });
-        // console.log("grouped : ", grouped);
-        setWardPolygons(grouped);
-      })
-      .catch((err) => console.error("Error loading ward coordinates:", err));
-  }, []);
-
-  // Load WardData from Excel file and Adding Other in public folder
-  useEffect(() => {
-    const loadWardData = async () => {
-      try {
-        // const response = await fetch("/datafiles/ward_data.xlsx");
-        // const arrayBuffer = await response.arrayBuffer();
-        // const workbook = XLSX.read(arrayBuffer, { type: "array" });
-        // const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        // const jsonData = XLSX.utils.sheet_to_json(sheet);
-
-        // Ward Options for User
-        // Hasmathpet, Tadbund, Mallikarjuna Nagar, Balaji Nagar
-        // filtering dummyWardsData
-        const allWardsL = DummyWardData;
-        // ? DummyWardData.length > 0
-        // : DummyWardData?.filter(
-        //     (each) => each.ward_name.toLowerCase() !== "hasmathpet"
-        //   );
-        // allWardsL.push(...jsonData);
-        allWardsL.sort();
-        // console.log("wardjsonData : ", allWardsL);
-
-        setWardData(allWardsL);
-      } catch (error) {
-        console.error("Error loading ward data:", error);
-      }
-    };
-    loadWardData();
-  }, []);
-  const parseDDMMYYYY = (str) => {
-  if (!str || typeof str !== "string") return new Date();
-  const [dd, mm, yyyy] = str.split("-");
-  const date = new Date(`${yyyy}-${mm}-${dd}`);
-  return isNaN(date.getTime()) ? new Date() : date;
+// --- Helper: Convert Excel serial date to JS Date ---
+const excelDateToJSDate = (serial) => {
+  const utc_days = Math.floor(serial - 25569);
+  const utc_value = utc_days * 86400;
+  const date_info = new Date(utc_value * 1000);
+  return new Date(date_info.getFullYear(), date_info.getMonth(), date_info.getDate());
 };
 
-  // 1. Parse CSV once
-  useEffect(() => {
-    Papa.parse("/datafiles/devices.csv", {
-      download: true,
-      header: true,
-      complete: (result) => {
-        const csvPoints = result.data
-          .filter((row) => row.latitude && row.longitude)
-          .map((row, index) => ({
-            id: `csv-${index + 1}`,
-            latitude: parseFloat(row.latitude),
-            longitude: parseFloat(row.longitude),
-            type: row.condition?.toLowerCase() || "safe",
-            manhole_id: row.id || `csv-${index + 1}`,
-            lastCleaned: parseDDMMYYYY(row.last_operation_date),
-            raw: row,
-            source: "csv",
-          }));
-        setManholePoints(csvPoints);
-      },
-      error: (err) => console.error("CSV parsing failed:", err),
-    });
-  }, []);
+// --- Main Status Function ---
+const getManholeStatus = (operationdates) => {
+  if (!operationdates) {
+    return "safe";
+  }
 
-  // Merge CSV + serverData points
-  const combinedPoints = [
-    ...manholePoints.map((point) => ({
-      ...point,
-      id: `${point.source || "csv"}-${point.manhole_id || point.id}-${point.latitude}-${point.longitude}`,
-      source: "csv",
-    })),
-    ...(serverData || [])
-    .filter((row) => row.location && row.location.includes(","))
-    .map((row, index) => {
-      const [lat, lon] = row.location.split(",");
-      const latitude = parseFloat(lat);
-      const longitude = parseFloat(lon);
+  let lastCleaned;
 
-      const safeLat = isNaN(latitude) ? `nan${index}` : latitude;
-      const safeLon = isNaN(longitude) ? `nan${index}` : longitude;
+  // Case 1: Excel serial number
+  if (typeof operationdates === "number") {
+    lastCleaned = excelDateToJSDate(operationdates);
+  } 
+  // Case 2: String (DD/MM/YYYY or DD-MM-YYYY)
+  else if (typeof operationdates === "string") {
+    const parts = operationdates.split(/[\/-]/);
+    if (parts.length === 3) {
+      const [day, month, year] = parts;
+      lastCleaned = new Date(`${year}-${month}-${day}`);
+    }
+  }
 
-      return {
-        id: `api-${row.device_id || row.id || "UNKNOWN"}-${safeLat}-${safeLon}-${index}`, // index added
-        latitude: isNaN(latitude) ? 0 : latitude,
-        longitude: isNaN(longitude) ? 0 : longitude,
-        type: "api",
-        manhole_id: row.device_id || row.id || `API-${index}`,
-        lastCleaned: row.operation_end_time
-          ? new Date(row.operation_end_time)
-          : new Date(),
-        raw: row,
-        source: "api",
-      };
-    }),
-  ];
+  // Validate
+  if (!lastCleaned || isNaN(lastCleaned.getTime())) {
+    console.error("Invalid date:", operationdates);
+    return "safe";
+  }
 
-  // SetWard Mapping Runs on Ward Input Changes
-  useEffect(() => {
-    if (selectedWard !== "Hasmathpet" && selectedWard) {
-      const SetWardMapping = async () => {
-        const wardGeoData = await setGeocode(selectedWard);
+  const today = new Date();
+  const diffTime = today - lastCleaned;
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  if (diffDays >= 20) return "danger";
+  if (diffDays >= 10) return "warning";
+  return "safe";
+};
+// Format any Excel date (serial or string) into DD/MM/YYYY for display
+const formatExcelDate = (value) => {
+  if (!value) return "N/A";
 
-        if (wardGeoData) {
-          const newLat = wardGeoData.lat;
-          const newLon = wardGeoData.lon;
-          // console.log("mapping warded", { lat: newLat, lon: newLon });
-          setMapCenter({ lat: newLat, lng: newLon, zoom: 15 });
-        }
-        // ✅ Normalize polygon
-        //   let polygons = [];
-        //   if (wardGeoData.geojson?.type === "Polygon") {
-        //     polygons = [
-        //       wardGeoData.geojson.coordinates[0].map(([lng, lat]) => [
-        //         lat,
-        //         lng,
-        //       ]),
-        //     ];
-        //   } else if (wardGeoData.geojson?.type === "MultiPolygon") {
-        //     polygons = wardGeoData.geojson.coordinates.map((poly) =>
-        //       poly[0].map(([lng, lat]) => [lat, lng])
-        //     );
-        //   }
+  // If it's already a string, return as-is
+  if (typeof value === "string") return value;
 
-        //   // ✅ Save polygon(s) to state for rendering
-        //   const updatedWardPolygons = {...wardPolygons, [selectedWard] : polygons};
-        //   console.log('polygons :', updatedWardPolygons);
-        //   setWardPolygons(updatedWardPolygons)
-        // }
+  // If it's a number (Excel serial)
+  if (typeof value === "number") {
+    const utc_days = Math.floor(value - 25569);
+    const utc_value = utc_days * 86400; 
+    const date_info = new Date(utc_value * 1000);
+    return date_info.toLocaleDateString("en-GB"); // DD/MM/YYYY
+  }
 
-        // console.log("mapping warded", wardGeoData);
-      };
+  return "Invalid Date";
+};
 
-      SetWardMapping();
-    }
-  }, [selectedWard]);
+// --- Main data loading and map initialization function ---
+const loadManholeData = async () => {
+  if (!map.current || !map.current.isStyleLoaded()) {
+    return; // Do nothing if the map isn't ready
+  }
 
-  const getStatusIcon = (lastCleaned) => {
-    const now = new Date();
-    const diffDays = Math.floor((now - lastCleaned) / (1000 * 60 * 60 * 24));
-    if (diffDays <= 5)
-      return { icon: CheckCircle, color: "green", type: "safe" };
-    if (diffDays <= 7) return { icon: Clock, color: "#ff7f00", type: "warning" };
-    return { icon: AlertTriangle, color: "red", type: "danger" };
-  };
+  try {
+    setIsLoading(true);
+    const response = await fetch("/datafiles/MH.xlsx");
+    const arrayBuffer = await response.arrayBuffer();
+    const workbook = XLSX.read(arrayBuffer, { type: "array" });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const manholeRows = XLSX.utils.sheet_to_json(sheet);
 
-  const findMatchingOps = (lat, lon) => {
-    const tolerance = 0.0005;
-    return operationData.filter((op) => {
-      if (!op.location) return false;
-      const [olat, olon] = op.location
-        .split(",")
-        .map((coord) => parseFloat(coord.trim()));
-      return (
-        Math.abs(olat - lat) < tolerance && Math.abs(olon - lon) < tolerance
-      );
-    });
-  };
+    const geojsonData = {
+      type: "FeatureCollection",
+      features: manholeRows.map(row => ({
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: [row.longitude, row.latitude],
+        },
+        properties: {
+          ...row,
+          status: getManholeStatus(row.last_operation_date),
+        },
+        id: row.id,
+      })),
+  };
 
-  const handleJumpToLocation = () => {
-    const lat = parseFloat(latInput);
-    const lon = parseFloat(lonInput);
-    if (!isNaN(lat) && !isNaN(lon)) {
-      setMapCenter({ lat, lng: lon });
-      setZoom(18);
-    }
-  };
+  // Check if the source and layer already exist
+  if (map.current.getSource("manholes")) {
+    map.current.getSource("manholes").setData(geojsonData);
+  } else {
+    map.current.addSource("manholes", {
+      type: "geojson",
+      data: geojsonData,
+      promoteId: "id",
+    });
 
-  const handleMarkerClick = (point) => {
-    console.log("point : ", point);
-    const ops = findMatchingOps(point.latitude, point.longitude);
-    setSelectedOps(ops);
-    setSelectedManholeLocation(point);
-    setLatInput(point.latitude);
-    setLonInput(point.longitude);
-    // RecenterMap(point.latitude, point.longitude, 10)
-    setMapCenter({ lat: point.latitude, lng: point.longitude, zoom: 20 });
-  };
+    map.current.addLayer({
+      id: "manhole-dots",
+      type: "circle",
+      source: "manholes",
+      paint: {
+        "circle-radius": 5,
+        "circle-stroke-width": 1.5,
+        "circle-stroke-color": "#fff",
+        "circle-color": [
+          "case",
+          ["boolean", ["feature-state", "selected"], false],
+          "#3b82f6",
+          ["match", ["get", "status"], "safe", "#22c55e", "warning", "#fbbf24", "danger", "#ef4444", "#ccc"],
+        ],
+      },
+    });
+  }
 
-  const handleClosePopup = () => {
-    // console.log('closing')
-    setSelectedManholeLocation(null);
-    setSelectedWard(null);
-  };
+  setIsLoading(false);
+  } catch (e) {
+    setError(e.message);
+    setIsLoading(false);
+    console.error("Error loading and processing manhole data:", e);
+  }
+};
 
-  const handleGenerateReport = (type) => {
-    const report = {
-      type,
-      timestamp: new Date().toISOString(),
-      data: {
-        location: selectedManholeLocation,
-        operations: selectedOps,
-        current: selectedOps[0],
-      },
-    };
+  // --- Initial Map and Data Loading ---
+  useEffect(() => {
+    if (map.current) return;
 
-    // Save to localStorage (since we can't use it in artifacts, this is for reference)
-    // In a real implementation, you'd save this to your backend or state management
-    console.log("Report generated:", report);
-    alert("✅ Report generated and saved!");
-    handleClosePopup();
-  };
+    map.current = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: "mapbox://styles/shubhamgv/cmdr5g1b2000c01sd8h0y6awy",
+      center: [78.4794, 17.3940],
+      zoom: 9.40,
+    });
 
-  const filteredPoints = combinedPoints.filter((point) => {
-    if (filter === "all") return true;
-    const status = getStatusIcon(point.lastCleaned).type;
-    return status === filter;
-  });
+    map.current.addControl(new mapboxgl.NavigationControl(), "top-left");
 
-  // Get unique ward names for the dropdown
-  // const uniqueWards = [...new Set(wardData.map((d) => d.ward_name))];
+    map.current.on("load", async () => {
+      loadManholeData();
+    });
 
-  return (
-    <div className="map-container w-full flex gap-1">
-      {/* Left section: top box + map */}
-      <div
-        className="transition-all relative duration-500 w-full"
-        style={{
-          width: selectedManholeLocation || selectedWard ? "65%" : "100%",
-        }}
-      >
-        {/* Top box */}
-        <div className="border-1 border-[#333] p-6 rounded-xl bg-white">
-          <div className="flex justify-between align-middle flex-wrap gap-2">
-            <p className="font-semibold text-md">
-              Interactive Hotspot Manhole Map
-            </p>
-            <div className="flex justify-center align-middle gap-4 ml-auto">
-              {["all", "safe", "warning", "danger"].map((f) => (
-                <button
-                  key={f}
-                  onClick={() => {
-                    setFilter(f);
-                    console.log("tab", f);
-                  }}
-                  style={{ paddingBlock: "5px", borderRadius: "5px" }}
-                  className={`${
-                    filter === f ? "btn-blue" : "btn-blue-outline"
-                  } text-sm rounded-md hover:scale-105 hover:shadow-md hover:shadow-gray-300 duration-150`}
-                >
-                  {f === "all"
-                    ? "All Locations"
-                    : f.charAt(0).toUpperCase() + f.slice(1)}
-                </button>
-              ))}
-            </div>
-          </div>
+    // --- Event Listeners ---
+    map.current.on("click", "manhole-dots", (e) => {
+      const clickedFeature = e.features[0];
+      if (!clickedFeature) return;
 
-          {/* Legend + Lat/Lon */}
-          <div className="mt-4 flex flex-col justify-start align-middle gap-4 pb-3">
-            <div className="flex items-center gap-5 text-sm">
-              <span className="flex items-center gap-1 space-x-1">
-                <span className="w-3 h-3 rounded-full bg-green-500"></span>Safe
-              </span>
-              <span className="flex items-center gap-1 space-x-1">
-                <span className="w-3 h-3 rounded-full bg-[#ff7f00]"></span>
-                Warning
-              </span>
-              <span className="flex items-center gap-1 space-x-1">
-                <span className="w-3 h-3 rounded-full bg-red-500"></span>Danger
-              </span>
-            </div>
+      const clickedManholeId = clickedFeature.id;
 
-            <div className="flex gap-3 justify-start align-middle flex-wrap">
-              <input
-                type="number"
-                placeholder="Latitude.."
-                value={latInput}
-                onChange={(e) => setLatInput(e.target.value)}
-                className="hover:shadow-md hover:shadow-gray-100 border-1 border-gray-500 outline-1 rounded-sm bg-white hover:bg-gray-50 px-2 py-1 w-auto max-w-[150px]"
-              />
-              <input
-                type="number"
-                placeholder="Longitude.."
-                value={lonInput}
-                onChange={(e) => setLonInput(e.target.value)}
-                className="hover:shadow-md hover:shadow-gray-100 border-1 border-gray-500 outline-1 rounded-sm bg-white hover:bg-gray-50 px-2 py-1 w-auto max-w-[150px]"
-              />
-              <button
-                onClick={handleJumpToLocation}
-                className="btn-blue btn-hover text-sm ml-3"
-                style={{ paddingBlock: "6px", borderRadius: "8px" }}
-              >
-                Go
-              </button>
-              <FilterableWardSelect
-                wardData={wardData}
-                selectedWard={selectedWard}
-                setSelectedWard={setSelectedWard}
-                setSelectedManholeLocation={setSelectedManholeLocation}
-              />
-            </div>
-          </div>
+      // Un-select the previously selected manhole using the ref
+      if (selectedManholeIdRef.current !== null) {
+        map.current.setFeatureState({ source: 'manholes', id: selectedManholeIdRef.current }, { selected: false });
+      }
 
-          {/* Map Box */}
-          <div
-            className="map-box relative rounded-lg overflow-hidden border border-gray-300"
-            style={{
-              height: "445.52px",
-              opacity: 1,
-            }}
-          >
-            <MapContainer
-              center={[mapCenter.lat, mapCenter.lng]}
-              zoom={zoom}
-              style={{ height: "100%", width: "100%" }}
-            >
-              <RecenterMap
-                lat={mapCenter.lat}
-                lng={mapCenter.lng}
-                zoom={zoom}
-              />
-              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      // Select the new manhole
+      map.current.setFeatureState({ source: 'manholes', id: clickedManholeId }, { selected: true });
 
-              {/* Ward polygon */}
-              {selectedWard && wardPolygons[selectedWard] && (
-                <>
-                  <ZoomToWard coordinates={wardPolygons[selectedWard]} />
-                  {/* {console.log("poly ", wardPolygons)} */}
-                  <Polygon
-                    positions={wardPolygons[selectedWard]}
-                    pathOptions={{
-                      color: "#1d4ed8",
-                      weight: 2,
-                      fillOpacity: 0.1,
-                    }}
-                  />
-                </>
-              )}
+      // Update the ref and state with the new manhole
+      selectedManholeIdRef.current = clickedManholeId;
+      setSelectedManholeLocation({
+        ...clickedFeature.properties,
+        latitude: clickedFeature.geometry.coordinates[1],
+        longitude: clickedFeature.geometry.coordinates[0],
+        lastCleaned: clickedFeature.properties.last_operation_date,
+      });
 
-              {filteredPoints.map((point) => {
-                const status = getStatusIcon(point.lastCleaned);
+      setSelectedWard(null);
+      map.current.flyTo({ center: clickedFeature.geometry.coordinates, zoom: 18 });
+    });
 
-                const imageIcon =
-                  point.type === "fair" || point.type === "good"
-                    ? "icons/completed-icon.png"
-                    : point.type === "poor"
-                    ? "icons/warning-orange-icon.png"
-                    : "icons/warning-red-icon.png";
+    map.current.on("mouseenter", "manhole-dots", (e) => {
+      map.current.getCanvas().style.cursor = "pointer";
+      if (e.features.length > 0) {
+        const feature = e.features[0];
+        popup.current
+          .setLngLat(feature.geometry.coordinates)
+          .setHTML(
+         `<div id="mhpop" style="font-size: 8px; padding: 2px; text-align: center; background-color: white; border-radius: 1px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+  <strong>ID:</strong> ${feature.properties.id}<br/>
+  <strong>Last Cleaned:</strong> ${formatExcelDate(feature.properties.last_operation_date)}
+</div>`
+          )
+          .addTo(map.current);
+      }
+    });
 
-                const titleBox = ReactDOMServer.renderToString(
-                  <div className="map-pin-titleBox flex justify-center align-middle gap-1">
-                    {/* <img
-                      src={imageIcon}
-                      alt={imageIcon}
-                      className="object-contain w-full h-auto max-w-[25px] aspect-square"
-                    /> */}
-                    <div className="text-gray-500 flex flex-col justify-start text-left">
-                      <span className="text-sm text-black font-[600]">
-                        {point.manhole_id}
-                      </span>
-                      <span className="text-[12px]">Last Cleaned: {point.lastCleaned?point.lastCleaned.toLocaleDateString("en-GB"):"N/A"}</span>
-                    </div>
-                  </div>
-                );
+    map.current.on("mouseleave", "manhole-dots", () => {
+      map.current.getCanvas().style.cursor = "";
+      popup.current.remove();
+    });
 
-                const customIcon = L.divIcon({
-                  html: `<div class="map-manhole-icon" style="background-color:${status.color};width:20px;aspect-ratio:1/1;border-radius:50%;border:3px solid #eee;">
-                    ${titleBox}
-                  </div>`,
-                  className: "",
-                });
+  }, []);
 
-                return (
-                  <Marker
-                    key={point.id}
-                    position={[point.latitude, point.longitude]}
-                    icon={customIcon}
-                    eventHandlers={{ click: () => handleMarkerClick(point) }}
-                  />
-                );
-              })}
-            </MapContainer>
+  // --- Daily data update timer ---
+  useEffect(() => {
+    const dailyTimer = setInterval(() => {
+      console.log("Re-calculating manhole status based on current date...");
+      loadManholeData();
+    }, 1000 * 60 * 60 * 24); // Rerun every 24 hours
 
-            {/* Map Pin Status Overlay Box */}
-            <div className="bg-[#ffffff] absolute left-2 bottom-2 z-[900] rounded-xl p-4 py-5 text-[12px] text-black flex flex-col gap-1">
-              <span className="flex items-center gap-3 space-x-1">
-                <span className="w-3 h-3 rounded-full bg-green-500"></span>Safe
-                - Regular Maintenance
-              </span>
-              <span className="flex items-center gap-3 space-x-1">
-                <span className="w-3 h-3 rounded-full bg-[#ff7f00]"></span>
-                Warning - Require Attention
-              </span>
-              <span className="flex items-center gap-3 space-x-1">
-                <span className="w-3 h-3 rounded-full bg-red-500"></span>Danger
-                - Immediate Action Needed
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+    return () => clearInterval(dailyTimer); // Cleanup on unmount
+  }, []);
 
-      {/* Right section: POP UPS */}
-      <div
-        className="db-popup-container overflow-x-hidden h-[665px] overflow-y-auto"
-        style={{
-          width: selectedManholeLocation || selectedWard ? "35%" : "0%",
-        }}
-      >
-        {/* Ward Details Popup */}
-        {selectedManholeLocation === "" && selectedWard && (
-          <div className="dB-Popup w-full flex justify-start h-full place-items-start transition-all duration-500">
-            <WardDetailsPopUp
-              selectedWard={selectedWard}
-              setSelectedWard={setSelectedWard}
-              wardData={wardData}
-            />
-          </div>
-        )}
+  // --- Load Ward Data from Excel Files ---
+  useEffect(() => {
+    fetch("/datafiles/ward_coordinates.xlsx")
+      .then((res) => res.arrayBuffer())
+      .then((ab) => {
+        const wb = XLSX.read(ab, { type: "array" });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const data = XLSX.utils.sheet_to_json(ws);
+        const grouped = {};
+        data.forEach((row) => {
+          const name = row.Ward;
+          const coord = [row.y, row.x];
+          if (!grouped[name]) grouped[name] = [];
+          grouped[name].push(coord);
+        });
+        setWardPolygons(grouped);
+      })
+      .catch((err) => console.error("Error loading ward coordinates:", err));
 
-        {/* Sidebar Manhole PopUp */}
-        {selectedManholeLocation && (
-          <div className="dB-Popup w-full flex justify-start place-items-start h-full  transition-all duration-500">
-            <ManholePopUp
-              selectedLocation={selectedManholeLocation}
-              selectedOps={selectedOps}
-              onClose={handleClosePopup}
-              onGenerateReport={handleGenerateReport}
-              lastCleaned={selectedManholeLocation.lastCleaned}
-            />
-          </div>
-        )}
-      </div>
-      {/* POPup ended */}
-    </div>
-  );
+    fetch("/datafiles/ward_data.xlsx")
+      .then((res) => res.arrayBuffer())
+      .then((ab) => {
+        const workbook = XLSX.read(ab, { type: "array" });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json(sheet);
+        setWardData(jsonData);
+      })
+      .catch((error) => console.error("Error loading ward data:", error));
+  }, []);
+
+  // --- Effect to Filter Manholes on the Map ---
+  useEffect(() => {
+    if (!map.current || !map.current.isStyleLoaded() || !map.current.getSource("manholes")) return;
+    const filterExpression = filter === "all" ? null : ["==", ["get", "status"], filter];
+    map.current.setFilter("manhole-dots", filterExpression);
+  }, [filter]);
+
+  // --- Effect to Draw and Zoom to Selected Ward Polygon ---
+  useEffect(() => {
+    if (!map.current || !map.current.isStyleLoaded()) return;
+    const removeWardLayer = () => {
+      if (map.current.getLayer("ward-polygon-layer")) map.current.removeLayer("ward-polygon-layer");
+      if (map.current.getLayer("ward-outline-layer")) map.current.removeLayer("ward-outline-layer");
+      if (map.current.getSource("ward-polygon-source")) map.current.removeSource("ward-polygon-source");
+    };
+    removeWardLayer();
+    if (selectedWard && wardPolygons[selectedWard]) {
+      const coordinates = wardPolygons[selectedWard];
+      const geojsonCoordinates = [coordinates.map(coord => [coord[1], coord[0]])];
+      map.current.addSource("ward-polygon-source", {
+        type: "geojson",
+        data: { type: "Feature", geometry: { type: "Polygon", coordinates: geojsonCoordinates } },
+      });
+      map.current.addLayer({
+        id: "ward-polygon-layer", type: "fill", source: "ward-polygon-source", paint: { "fill-color": "#1d4ed8", "fill-opacity": 0.1 },
+      });
+      map.current.addLayer({
+        id: "ward-outline-layer", type: "line", source: "ward-polygon-source", paint: { "line-color": "#1d4ed8", "line-width": 2 }
+      });
+      const bounds = new mapboxgl.LngLatBounds();
+      coordinates.forEach(coord => { bounds.extend([coord[1], coord[0]]); });
+      map.current.fitBounds(bounds, { padding: 40, duration: 1000 });
+    }
+  }, [selectedWard, wardPolygons]);
+
+  // --- Handlers ---
+  const clearManholeSelection = () => {
+    if (selectedManholeIdRef.current !== null && map.current && map.current.getSource('manholes')) {
+      map.current.setFeatureState({ source: 'manholes', id: selectedManholeIdRef.current }, { selected: false });
+    }
+    selectedManholeIdRef.current = null;
+    setSelectedManholeLocation(null);
+  };
+  const handleClosePopup = () => clearManholeSelection();
+  const handleGenerateReport = () => { console.log("Report generated and saved!"); clearManholeSelection(); };
+  const handleAssignBot = () => { console.log("Successfully booked a bot."); clearManholeSelection(); };
+  const handleJumpToLocation = () => {
+    const lat = parseFloat(latInput);
+    const lon = parseFloat(lonInput);
+    if (!isNaN(lat) && !isNaN(lon) && map.current) {
+      map.current.flyTo({ center: [lon, lat], zoom: 18 });
+    }
+  };
+  const handleWardChange = (e) => {
+    clearManholeSelection();
+    setSelectedWard(e.target.value);
+  };
+  const handleReset = () => {
+    clearManholeSelection();
+    setSelectedWard(null);
+    if (map.current) {
+      map.current.flyTo({ center: [78.4894, 17.4740], zoom: 14.69, });
+    }
+  };
+
+  return (
+    <div className="map-container w-full flex gap-1">
+      {/* --- Left section: Controls + Map --- */}
+      <div
+        className="transition-all relative duration-500 w-full"
+        style={{ width: selectedManholeLocation || selectedWard ? "65%" : "100%", }}
+      >
+        <div className="shadow-md shadow-gray-500 p-6 mb-4 rounded-xl bg-white">
+          {/* Top Controls */}
+          <div className="flex justify-between align-middle flex-wrap gap-2">
+            <p className="font-semibold text-md">Interactive Hotspot Manhole Map</p>
+            <div className="flex justify-center align-middle gap-4 ml-auto">
+              {["all", "safe", "warning", "danger"].map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setFilter(f)}
+                  style={{ paddingBlock: "5px", borderRadius: "5px" }}
+                  className={`${filter === f ? "btn-blue" : "btn-blue-outline"} text-sm rounded-md hover:scale-105 hover:shadow-md hover:shadow-gray-300 duration-150`}
+                >
+                  {f === "all" ? "All Locations" : f.charAt(0).toUpperCase() + f.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+          {/* Bottom Controls */}
+          <div className="mt-4 flex flex-col justify-start align-middle gap-4 pb-3">
+            <div className="flex items-center gap-5 text-sm">
+              <span className="flex items-center gap-1 space-x-1"><span className="w-3 h-3 rounded-full bg-green-500"></span>Safe</span>
+              <span className="flex items-center gap-1 space-x-1"><span className="w-3 h-3 rounded-full bg-yellow-500"></span>Warning</span>
+              <span className="flex items-center gap-1 space-x-1"><span className="w-3 h-3 rounded-full bg-red-500"></span>Danger</span>
+            </div>
+            <div className="flex gap-3 justify-start align-middle flex-wrap">
+              <input type="number" placeholder="Latitude.." value={latInput} onChange={(e) => setLatInput(e.target.value)} className="hover:shadow-md border border-gray-300 rounded-sm bg-white hover:bg-gray-50 px-2 py-1 w-auto max-w-[150px]"/>
+              <input type="number" placeholder="Longitude.." value={lonInput} onChange={(e) => setLonInput(e.target.value)} className="hover:shadow-md border border-gray-300 rounded-sm bg-white hover:bg-gray-50 px-2 py-1 w-auto max-w-[150px]"/>
+              <button onClick={handleJumpToLocation} className="btn-blue btn-hover text-sm ml-3" style={{ paddingBlock: "6px", borderRadius: "8px" }}>Go</button>
+               <FilterableWardSelect wardData={wardData} selectedWard={selectedWard} setSelectedWard={setSelectedWard} setSelectedManholeLocation={setSelectedManholeLocation} />
+            </div>
+          </div>
+          {/* Map Container */}
+          <div
+            className="map-box relative rounded-lg overflow-hidden border border-gray-300"
+            style={{ height: "445.52px", opacity: 1 }}
+          >
+              <button onClick={handleReset} className="bg-white absolute right-2 top-2 z-[500] rounded px-2 py-1 text-xs border border-gray-400 hover:bg-gray-100">Recenter</button>
+            <div ref={mapContainer} className="h-full w-full" />
+            {isLoading && <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10">Loading map...</div>}
+            {error && <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10 text-red-500">Error: {error}</div>}
+            <div className="bg-[#ffffff] absolute left-2 bottom-2 z-[900] rounded-xl p-4 py-5 text-[12px] text-black flex flex-col gap-1">
+              <span className="flex items-center gap-3 space-x-1">
+                <span className="w-3 h-3 rounded-full bg-green-500"></span>Safe - Regular Maintenance
+              </span>
+              <span className="flex items-center gap-3 space-x-1">
+                <span className="w-3 h-3 rounded-full bg-yellow-500"></span>Warning - Require Attention
+              </span>
+              <span className="flex items-center gap-3 space-x-1">
+                <span className="w-3 h-3 rounded-full bg-red-500"></span>Danger - Immediate Action Needed
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* --- Right section: Pop-ups --- */}
+      <div
+        className="db-popup-container overflow-x-hidden h-[665px] overflow-y-auto "
+        style={{ width: selectedManholeLocation || selectedWard ? "35%" : "0%", }}
+      >
+        {/* Ward Details Popup */}
+        {selectedWard && !selectedManholeLocation && (
+          <div className="dB-Popup w-full flex justify-start h-full place-items-start transition-all duration-500">
+            <WardDetailsPopUp selectedWard={selectedWard} setSelectedWard={setSelectedWard} wardData={wardData} />
+          </div>
+        )}
+        {/* Manhole Details Popup */}
+        {selectedManholeLocation && (
+          <div className="dB-Popup w-full flex justify-start place-items-start h-full transition-all duration-500">
+            <ManholePopUp
+              selectedLocation={selectedManholeLocation}
+              onClose={handleClosePopup}
+              onGenerateReport={handleGenerateReport}
+              onAssignBot={handleAssignBot}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default MapComponent;
