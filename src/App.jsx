@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
 
-import ScrollToTop from "./Components/ScrollToTop";
+import ScrollToTop from "./Hooks/ScrollToTop";
 import Header from "./Components/Header";
 
 import Dashboard from "./Pages/Dashboard";

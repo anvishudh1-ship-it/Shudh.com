@@ -107,7 +107,7 @@ const EmergencyBlockage = () => {
                   <h4 className="text-2xl   ">
                     {data?.operator_name || "Sarah Chen"}
                   </h4>
-                  <p className="text-lg text-gray-500 ">
+                  <p className="text-lg text-gray-500">
                     {data?.operator_role || "Operator"}
                   </p>
                 </div>

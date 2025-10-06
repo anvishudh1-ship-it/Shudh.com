@@ -1,9 +1,9 @@
 import { useState } from "react";
-import MapComponent from "../Components/MapComponent";
-import MaintainenceComp from "../Components/MaintainenceComp";
-import PredictComp from "../Components/PredictComp";
-import PreventComp from "../Components/PreventComp";
-import CureComp from "../Components/CureComp";
+import MapComponent from "../Components/DashboardFiles/MapComponent";
+import MaintainenceComp from "../Components/DashboardFiles/MaintainenceComp";
+import PredictComp from "../Components/DashboardFiles/PredictComp";
+import PreventComp from "../Components/DashboardFiles/PreventComp";
+import CureComp from "../Components/DashboardFiles/CureComp";
 import { ChartLine, CircleCheckBig, ShieldCheck, X } from "lucide-react";
 // import MapWardSearchComp from "../Components/MapWardSearchComp";
 
