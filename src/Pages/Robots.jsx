@@ -2,13 +2,15 @@ import { useState, useEffect, act } from "react";
 import Papa from "papaparse";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { Bot, Calendar, Download, MapPin, Funnel, CalendarIcon, ClockIcon } from "lucide-react";
+import { Bot, Calendar, Download, MapPin, Funnel, CalendarIcon, ClockIcon ,Search ,MapPinned , FireExtinguisher} from "lucide-react";
 import { Clock } from "lucide-react";
 import { Trash } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import "leaflet/dist/leaflet.css";
+ 
+
 
 
 // ⬇️ import the global server data from context (adjust path if needed)
@@ -378,11 +380,7 @@ useEffect(() => {
               onClick={handleFilter}
             >
               <span>
-                <img
-                  src="/icons/search-icon.png"
-                  alt="Search Icon"
-                  className="inline-block w-4 h-4"
-                />
+             <Search className="w-4.5" />
               </span>
               View Bots
             </button>
@@ -424,20 +422,17 @@ useEffect(() => {
                       <div className="space-y-2">
                         <p className="flex items-center mb-2">
                           <span className="text-lg">
-                            <img
-                              src="/icons/robot-icon.png"
-                              alt="Device Icon"
-                              className="inline-block w-4 h-4 mr-1"
+                            <Bot
+                         
+                              className="inline-block w-4 h-4 mr-1 mb-1"
                             />
                           </span>
                           Device ID: {item?.device_id || "-"}
                         </p>
                         <p className="flex items-center mb-2">
                           <span className="text-lg">
-                            <img
-                              src="/icons/calendar-icon.png"
-                              alt="Last Operation Icon"
-                              className="inline-block w-4 h-4 mr-1"
+                            < Calendar
+                              className="inline-block w-3 h-4 mr-2 mb-1"
                             />
                           </span>
                           Last operation:{" "}
@@ -445,10 +440,8 @@ useEffect(() => {
                         </p>
                         <p className="flex items-center mb-2">
                           <span className="text-lg">
-                            <img
-                              src="/icons/gas-icon.png"
-                              alt="Gas Level Icon"
-                              className="inline-block w-4 h-4 mr-1"
+                            <FireExtinguisher
+                              className="inline-block w-4 h-4 mr-1 mb-1"
                             />
                           </span>
                           Gas status: {item.gas_status
@@ -458,10 +451,9 @@ useEffect(() => {
                         </p>
                         <p className="flex items-center mb-2">
                           <span className="text-lg">
-                            <img
-                              src="/icons/map-pin-icon.png"
-                              alt="Last Operation Icon"
-                              className="inline-block w-4 h-4 mr-1"
+                            <MapPin
+                             
+                              className="inline-block w-4 h-4 mr-1 mb-1"
                             />
                           </span>
                           Ward: {item.area}
@@ -528,20 +520,16 @@ useEffect(() => {
                 <div className="w-[48%] ">
                   <div className="flex flex-col justify-start text-gray-500 w-full">
                     <span className="text-start text-[14px] text-[#676D7E]">
-                      <img
-                        src="/icons/map-marker-icon.png"
-                        alt=""
-                        className="inline-block w-4  mr-1 "
+                      < MapPin  className="inline-block w-4  mr-2 mb-1 text-blue-600 "
+                       
                       />
                       Division:{activeRecord?.division || "- "}
                     </span>
                     <br />
                     <span className="text-start text-[14px] text-[#676D7E]">
-                      <img
-                        src="/icons/map-marker2-icon.png"
-                        alt=""
-                        className="inline-block w-4  mr-1 "
-                      />
+                   
+                        
+                     <MapPinned className="inline-block w-4  mr-2 mb-1 text-blue-500 "/>
                       Section:{activeRecord?.area || "- "}
                     </span>
                   </div>

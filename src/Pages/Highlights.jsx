@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Papa from "papaparse";
+import { Clock, TriangleAlert , User, CircleCheckBig } from 'lucide-react';
 
 const EmergencyBlockage = () => {
   const [data, setData] = useState(null);
@@ -53,10 +54,8 @@ const EmergencyBlockage = () => {
               </p>
               <p className="text-gray-600 text-start pb-3 mt-3">
                 <span>
-                  <img
-                    src="/icons/person-icon.png"
-                    alt="Operator"
-                    className="inline-block w-6 h-auto mr-2"
+                  <User
+                    className="inline-block w-5 h-auto mr-2 mb-1"
                   />
                 </span>
                 Operator Name:
@@ -175,10 +174,8 @@ const EmergencyBlockage = () => {
           <div className="w-full flex flex-nowrap shrink-1 items-center justify-center gap-0 text-center mb-8 mt-10 px-auto">
             <div className="flex flex-row">
               <div className="bg-red-50 h-11 w-11 flex items-center rounded-3xl m-auto shadow-xl shadow-gray-200">
-                <img
-                  src="/icons/warning-red-icon.png"
-                  alt="icon"
-                  className="w-[25px] h-auto m-auto"
+                < TriangleAlert
+                  className="w-[25px] h-auto m-auto text-red-600"
                 />
               </div>
               <div className="w-35 p-2 ml-2 pr-0">
@@ -195,10 +192,8 @@ const EmergencyBlockage = () => {
             </div>
             <div className="flex flex-row  ">
               <div className="bg-blue-50 h-11 w-11 flex items-center rounded-3xl m-auto shadow-xl shadow-gray-200">
-                <img
-                  src="/icons/clock-blue-icon.png"
-                  alt="icon"
-                  className="w-[25px] h-auto m-auto"
+                <Clock
+                  className="w-[25px] h-auto m-auto text-blue-500"
                 />
               </div>
               <div className="w-35 p-2 ml-2">
@@ -215,10 +210,8 @@ const EmergencyBlockage = () => {
             </div>
             <div className="flex flex-row">
               <div className="bg-yellow-50 h-11 w-11 flex items-center rounded-3xl m-auto shadow-xl shadow-gray-200">
-                <img
-                  src="/icons/warning-orange-icon.png"
-                  alt="icon"
-                  className="w-[25px] h-auto m-auto"
+                <TriangleAlert
+                  className="w-[25px] h-auto m-auto text-yellow-400"
                 />
               </div>
               <div className="w-35 p-2 ml-2">
@@ -235,10 +228,8 @@ const EmergencyBlockage = () => {
             </div>
             <div className="flex flex-row">
               <div className="bg-green-50 h-11 w-11 flex items-center rounded-3xl m-auto shadow-xl shadow-gray-200">
-                <img
-                  src="/icons/completed-icon.png"
-                  alt="icon"
-                  className="w-[25px] h-auto m-auto"
+                <CircleCheckBig
+                  className="w-[25px] h-auto m-auto text-green-500"
                 />
               </div>
               <div className="w-35 p-2 ml-2">
