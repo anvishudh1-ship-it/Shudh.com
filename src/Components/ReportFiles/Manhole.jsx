@@ -185,10 +185,10 @@ const ManholeReport = () => {
       <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
       
       <div className="bg-gray-50 text-gray-900 font-sans ">
-        <header className="bg-gray-800 text-white text-center py-4 w-full ml-[520px]">
+        <div className="bg-gray-800 text-white text-center py-4 w-full ">
           <h1 className="text-3xl font-bold"> Manhole Report</h1>
           <p className="mt-2 text-sm">Detailed operational, inspection, and predictive analysis</p>
-        </header>
+        </div>
         <div className="dashboard-container max-w-6xl mx-auto p-5 min-h-screen pb-12">
           {errorMessage && (
             <div className="bg-red-500 text-white p-3 rounded-lg text-center mb-5">

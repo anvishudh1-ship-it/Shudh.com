@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { File, ChartLine, FileChartColumnIncreasing, Bot } from "lucide-react";
+import { File, ChartLine, FileChartColumnIncreasing, Bot , Search } from "lucide-react";
 // 1. Import the ManholeReport component
-import Manhole from "../Components/Manhole"; 
-import Ward from "../Components/Ward";
+import Manhole from "../Components/ReportFiles/Manhole"; 
+import Ward from "../Components/ReportFiles/Ward";
 
 export default function Reports() {
   const divisions = [
@@ -262,7 +262,7 @@ export default function Reports() {
           onClick={handleSearch}
           className=" self-start justify-items-start cursor-pointer bg-[#1A8BA8] text-white px-6 py-2 rounded-xl mt-7 hover:bg-[#166f86] flex items-center gap-2 shadow-xl btn-hover transition duration-500 "
         >
-          <img src="/icons/search-icon.png" alt="Search" className="w-5 h-5" />
+         <Search className="w-4.5" />
           Search Reports
         </button>
 

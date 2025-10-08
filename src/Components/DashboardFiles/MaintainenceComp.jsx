@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import MaintainenceCard from "./MaintainenceCard";
-import maintenanceTasks from "../maintainenceDumData";
+import maintenanceTasks from "../../maintainenceDumData";
 
 const filterBtnsList = [
   { label: "All Tasks", value: "all" },

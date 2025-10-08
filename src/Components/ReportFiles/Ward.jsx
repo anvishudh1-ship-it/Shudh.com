@@ -202,10 +202,10 @@ const App = () => {
             <script src="https://cdn.tailwindcss.com"></script>
             <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-            <header className="bg-gray-900 text-white p-4 text-center ml-[520px] w-full">
+            <div className="bg-gray-900 text-white p-4 text-center  w-full">
                 <h1 className="text-xl md:text-2xl font-bold">Ward Report - Hasmathpet</h1>
                 <p className="text-sm md:text-base">Comprehensive analysis of manhole network, operational records, and area data</p>
-            </header>
+            </div>
             <div className="container mx-auto p-5 max-w-7xl">
                 {loading ? (
                     <div className="text-center text-gray-500">Loading data...</div>
