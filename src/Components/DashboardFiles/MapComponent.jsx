@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import * as XLSX from "xlsx";
@@ -175,62 +175,30 @@ const MapComponent = () => {
       console.error("Error loading and processing manhole data:", e);
     }
   };
-  // 🔹 Reset zone when ward changes
-  useEffect(() => {
-    setSelectedZone("All");
-  }, [selectedWard]);
+// Filter manholes when zone changes
+useEffect(() => {
+  if (!map.current || !map.current.isStyleLoaded() || !map.current.getSource("manholes") || allManholeData.length === 0)
+    return;
 
-  // 🔹 Dynamic filtering based on Ward + Zone
-  useEffect(() => {
-    if (!map.current || !map.current.isStyleLoaded()) return;
+  const filtered = selectedZone === "All"
+    ? allManholeData
+    : allManholeData.filter((row) => row.Zone === selectedZone);
 
-    const source = map.current.getSource("manholes");
-    if (!source || allManholeData.length === 0) return;
+  const geojsonData = {
+    type: "FeatureCollection",
+    features: filtered.map((row) => ({
+      type: "Feature",
+      geometry: { type: "Point", coordinates: [row.longitude, row.latitude] },
+      properties: {
+        ...row,
+        status: getManholeStatus(row.last_operation_date),
+      },
+      id: row.id,
+    })),
+  };
 
-    // Step 1: Filter by selected ward (if any)
-    let filtered = selectedWard
-      ? allManholeData.filter(
-        (row) =>
-          row.area_name?.toString().trim().toLowerCase() ===
-          selectedWard?.toString().trim().toLowerCase()
-      )
-      : allManholeData;
-
-    // Step 2: Update zone list dynamically (unique zones inside that ward)
-    const uniqueZones = [...new Set(filtered.map((row) => row.Zone))]
-      .filter(Boolean)
-      .sort();
-    setZoneList(["All", ...uniqueZones]);
-
-    // Step 3: Apply zone filter if a specific zone is selected
-    if (selectedZone && selectedZone !== "All") {
-      filtered = filtered.filter(
-        (row) =>
-          row.Zone?.toString().trim().toLowerCase() ===
-          selectedZone?.toString().trim().toLowerCase()
-      );
-    }
-
-    // Step 4: Convert filtered rows to GeoJSON
-    const geojsonData = {
-      type: "FeatureCollection",
-      features: filtered.map((row) => ({
-        type: "Feature",
-        geometry: {
-          type: "Point",
-          coordinates: [parseFloat(row.longitude), parseFloat(row.latitude)],
-        },
-        properties: {
-          ...row,
-          status: getManholeStatus(row.last_operation_date),
-        },
-        id: row.id,
-      })),
-    };
-
-    // Step 5: Update map source data
-    source.setData(geojsonData);
-  }, [selectedWard, selectedZone, allManholeData]);
+  map.current.getSource("manholes").setData(geojsonData);
+}, [selectedZone, allManholeData]);
 
 
   // --- Initial Map and Data Loading ---
@@ -239,7 +207,7 @@ const MapComponent = () => {
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: "mapbox://styles/shubhamgv/cmdr5g1b2000c01sd8h0y6awy",
+      style: "mapbox://styles/shubhamgv/cmggj327600ke01pd15kqh8v6",
       center: [78.4794, 17.3940],
       zoom: 9.40,
     });
@@ -321,7 +289,7 @@ const MapComponent = () => {
         const data = XLSX.utils.sheet_to_json(ws);
         const grouped = {};
         data.forEach((row) => {
-          const name = row.area_name;
+          const name = row.Ward;
           const coord = [row.y, row.x];
           if (!grouped[name]) grouped[name] = [];
           grouped[name].push(coord);
@@ -394,12 +362,10 @@ const MapComponent = () => {
       map.current.flyTo({ center: [lon, lat], zoom: 18 });
     }
   };
-
   const handleWardChange = (e) => {
     clearManholeSelection();
     setSelectedWard(e.target.value);
   };
-
   const handleReset = () => {
     clearManholeSelection();
     setSelectedWard(null);
@@ -433,55 +399,35 @@ const MapComponent = () => {
             </div>
           </div>
           {/* Bottom Controls */}
-          <div className="flex gap-3 justify-start align-middle flex-wrap mt-[10px]">
-            <input
-              type="number"
-              placeholder="Latitude.."
-              value={latInput}
-              onChange={(e) => setLatInput(e.target.value)}
-              className="hover:shadow-md border border-gray-300 rounded-sm bg-white hover:bg-gray-50 px-2 py-1 w-auto max-w-[150px]"
-            />
-            <input
-              type="number"
-              placeholder="Longitude.."
-              value={lonInput}
-              onChange={(e) => setLonInput(e.target.value)}
-              className="hover:shadow-md border border-gray-300 rounded-sm bg-white hover:bg-gray-50 px-2 py-1 w-auto max-w-[150px]"
-            />
-            <button
-              onClick={handleJumpToLocation}
-              className="btn-blue btn-hover text-sm ml-3"
-              style={{ paddingBlock: "6px", borderRadius: "8px" }}
-            >
-              Go
-            </button>
+          <div className="mt-4 flex flex-col justify-start align-middle gap-4 pb-3">
+            <div className="flex items-center gap-5 text-sm">
+              <span className="flex items-center gap-1 space-x-1"><span className="w-3 h-3 rounded-full bg-green-500"></span>Safe</span>
+              <span className="flex items-center gap-1 space-x-1"><span className="w-3 h-3 rounded-full bg-yellow-500"></span>Warning</span>
+              <span className="flex items-center gap-1 space-x-1"><span className="w-3 h-3 rounded-full bg-red-500"></span>Danger</span>
+            </div>
+            <div className="flex gap-3 justify-start align-middle flex-wrap">
+              <input type="number" placeholder="Latitude.." value={latInput} onChange={(e) => setLatInput(e.target.value)} className="hover:shadow-md border border-gray-300 rounded-sm bg-white hover:bg-gray-50 px-2 py-1 w-auto max-w-[150px]" />
+              <input type="number" placeholder="Longitude.." value={lonInput} onChange={(e) => setLonInput(e.target.value)} className="hover:shadow-md border border-gray-300 rounded-sm bg-white hover:bg-gray-50 px-2 py-1 w-auto max-w-[150px]" />
+              <button onClick={handleJumpToLocation} className="btn-blue btn-hover text-sm ml-3" style={{ paddingBlock: "6px", borderRadius: "8px" }}>Go</button>
+              <FilterableWardSelect wardData={wardData} selectedWard={selectedWard} setSelectedWard={setSelectedWard} setSelectedManholeLocation={setSelectedManholeLocation} />
+             <select
+  value={selectedZone}
+  onChange={(e) => setSelectedZone(e.target.value)}
+  className="hover:shadow-md border border-gray-300 rounded-sm bg-white hover:bg-gray-50 px-2 py-1 w-auto max-w-[160px]"
+>
+  {zoneList.map((zone, idx) => (
+    <option key={idx} value={zone}>
+      {zone}
+    </option>
+  ))}
+</select>
 
-            <FilterableWardSelect
-              wardData={wardData}
-              selectedWard={selectedWard}
-              setSelectedWard={setSelectedWard}
-              setSelectedManholeLocation={setSelectedManholeLocation}
-            />
+            </div>
 
-            {/* 🔹 Show zone dropdown only after a ward is selected */}
-            {selectedWard && (
-              <select
-                value={selectedZone}
-                onChange={(e) => setSelectedZone(e.target.value)}
-                className="hover:shadow-md border border-gray-300 rounded-sm bg-white hover:bg-gray-50 px-2 py-1 w-auto max-w-[160px]"
-              >
-                {zoneList.map((zone, idx) => (
-                  <option key={idx} value={zone}>
-                    {zone}
-                  </option>
-                ))}
-              </select>
-            )}
           </div>
-
           {/* Map Container */}
           <div
-            className="map-box relative rounded-lg overflow-hidden border border-gray-300 mt-[10px]"
+            className="map-box relative rounded-lg overflow-hidden border border-gray-300"
             style={{ height: "445.52px", opacity: 1 }}
           >
             <button onClick={handleReset} className="bg-white absolute right-2 top-2 z-[500] rounded px-2 py-1 text-xs border border-gray-400 hover:bg-gray-100">Recenter</button>

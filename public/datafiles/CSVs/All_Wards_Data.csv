@@ -1,2 +1,3 @@
 s.no,ward_name,ward_id,no_of_manholes,Population,waste_colleccted,no_of_robo's,Total_sewer_length,area,perimeter,landuse_classes
-1,Hasmathpet,1,8000,1258963,100,15,145,726916.255,5197.439,"Residential, Slum, Water_body"
+1,Hasmathpet,1,8000,1258963,100,15,145,726916,5198,"Residential, Slum, Water_body"
+2,SR Nagar,2,7000,234554,150,20,123,679234,4134,"Residential, Slum, Water_body"
