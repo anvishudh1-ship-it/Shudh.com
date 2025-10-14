@@ -34,7 +34,7 @@ const App = () => {
         try {
             const response = await fetch(sheetUrl);
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(` HTTP error! status: ${response.status}`);
             }
             const textData = await response.text();
 
@@ -107,7 +107,7 @@ const App = () => {
                         color: '#fff',
                         formatter: (value, context) => {
                             const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-                            return total ? `${((value / total) * 100).toFixed(1)}%` : '';
+                            return total ?  `${((value / total) * 100).toFixed(1)}%` : '';
                         }
                     }
                 }
@@ -196,7 +196,7 @@ const App = () => {
             </div>
         );
     };
-    
+
     return (
         <div className="bg-gray-50 font-sans text-black min-h-screen">
             <script src="https://cdn.tailwindcss.com"></script>

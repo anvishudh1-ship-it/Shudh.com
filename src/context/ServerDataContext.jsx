@@ -11,11 +11,11 @@ export const ServerDataProvider = ({ children }) => {
   useEffect(() => {
     const fetchServerData = async () => {
       try {
-        setMessage("Fetching server data...");
+        setMessage("Fetching Bots data...");
         setLoading(true);
 
         const response = await fetch(
-          "https://sewage-bot-backend-vw44.onrender.com/api/data"
+          "https://sewage-bot.onrender.com/api/data"
         );
 
         if (!response.ok) throw new Error(`Server error: ${response.status}`);
