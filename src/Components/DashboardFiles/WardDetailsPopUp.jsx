@@ -1,26 +1,47 @@
+// --- WardDetailsPopUp.jsx ---
+
 import { X } from "lucide-react";
 import React from "react";
 
+// The 'selectedWard' prop is the fully loaded data object (selectedWardForPopup)
+// from the MapComponent, so we use it directly.
 const WardDetailsPopUp = ({ selectedWard, setSelectedWard, wardData }) => {
+    
   if (!selectedWard) return null;
 
-  const selectedWardInfo = wardData.find((i) => i.ward_name === selectedWard);
-  // console.log(selectedWardInfo);
+  // FIX 1: Use selectedWard directly as it is already the data object.
+  // We rename it locally to wardDetails for clarity.
+  const wardDetails = selectedWard; 
+
+  // FIX 2: Use the CORRECT column names from the Excel sheet (Area_name, no_of_robo's, s_no, etc.)
+  // We use bracket notation for 's.no' and 'no_of_robo's' to handle possible non-standard names.
   const {
+    // Note: The XLSX parser often converts "s.no" to "s_no" or keeps "s.no".
+    // We try to access it via s_no first for safety if that's what the parser gave.
     "s.no": sNo,
+    "S.no": SNo, // Check for capitalization
     Population,
     Total_sewer_length,
-    area,
+    area, // This is likely the Area (sq.m) column
     landuse_classes,
     no_of_manholes,
-    "no_of_robo's": noOfRobos,
+    "no_of_robo's": noOfRobos, // Access using bracket notation
     perimeter,
     ward_id,
-    ward_name,
-    waste_colleccted,
-  } = selectedWardInfo;
+    zone,
+    
+    // CRITICAL: Use the actual Area_name column from the sheet
+    Area_name, 
+    
+    // Note: waste_colleccted in the original code is waste_colleccted, assuming this is correct.
+    waste_colleccted, 
+  } = wardDetails;
+  
+  // Choose the best available S.No
+  const finalSNo = sNo || SNo || wardDetails.s_no || 'N/A'; 
 
-  // console.log(selectedWard, wardData);
+
+  // ... rest of the component (no further changes needed)
 
   return (
     <div className="flex w-full h-max overflow-x-hidden relative flex-col p-2 rounded-xl border-1 border-gray-400 shadow-xl shadow-gray-300">
@@ -32,8 +53,10 @@ const WardDetailsPopUp = ({ selectedWard, setSelectedWard, wardData }) => {
         }}
       >
         <div className="flex flex-col justify-center relative align-middle gap-2 text-white text-left">
-          <h1 className="text-xl font-bold ">{`Ward: ${ward_name}`}</h1>
-          <p className="text-[12px]">Zone : N/A</p>
+          {/* Use Area_name here for the title */}
+          <h1 className="text-xl font-bold ">{`Ward: ${Area_name}`}</h1>
+          <p className="text-[12px]">{`Zone :${zone}`}</p>
+          {/* ... Generate Report button ... */}
           <button
             type="button"
             className="btn-hover cursor-pointer"
@@ -51,7 +74,8 @@ const WardDetailsPopUp = ({ selectedWard, setSelectedWard, wardData }) => {
           </button>
         </div>
         <button
-          onClick={() => setSelectedWard(null)}
+          // Setting selectedAreaName to null in MapComponent's state clears the popup
+          onClick={() => setSelectedWard("All")} 
           className="absolute cursor-pointer top-5 right-2"
         >
           <X className="text-white" />
@@ -70,13 +94,13 @@ const WardDetailsPopUp = ({ selectedWard, setSelectedWard, wardData }) => {
           <tbody>
             <tr>
               <td className="p-2 font-semibold border border-gray-400">S.No</td>
-              <td className="p-2 border border-gray-400">{sNo}</td>
+              <td className="p-2 border border-gray-400">{finalSNo}</td>
             </tr>
             <tr>
               <td className="p-2 font-semibold border border-gray-400">
                 Ward Name
               </td>
-              <td className="p-2 border border-gray-400">{ward_name}</td>
+              <td className="p-2 border border-gray-400">{Area_name}</td>
             </tr>
             <tr>
               <td className="p-2 font-semibold border border-gray-400">
@@ -84,6 +108,7 @@ const WardDetailsPopUp = ({ selectedWard, setSelectedWard, wardData }) => {
               </td>
               <td className="p-2 border border-gray-400">{ward_id}</td>
             </tr>
+            {/* ... rest of the table body, using the new destructured variables ... */}
             <tr>
               <td className="p-2 font-semibold border border-gray-400">
                 No. of Manholes
@@ -98,7 +123,7 @@ const WardDetailsPopUp = ({ selectedWard, setSelectedWard, wardData }) => {
             </tr>
             <tr>
               <td className="p-2 font-semibold border border-gray-400">
-                Waste Collected (tons)
+                Waste Collected (kgs)
               </td>
               <td className="p-2 border border-gray-400">
                 {waste_colleccted} kgs
